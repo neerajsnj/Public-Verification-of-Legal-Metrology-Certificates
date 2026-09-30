@@ -1,0 +1,142 @@
+<%- include('../partials/header') %>
+
+<div class="container">
+  <div class="page-header">
+    <div>
+      <h1>Verification Applications Queue</h1>
+      <p>Filter, review, and process verification requests across jurisdictions</p>
+    </div>
+    <div class="page-actions">
+      <a href="/inspector/analytics" class="btn btn-outline">Performance Analytics</a>
+    </div>
+  </div>
+
+  <!-- Multi-Filter Toolbar -->
+  <form action="/inspector/applications" method="GET" class="filter-toolbar">
+    
+    <div class="filter-group">
+      <label for="statusFilter">Status</label>
+      <select id="statusFilter" name="status">
+        <option value="all" <%= filters.status === 'all' ? 'selected' : '' %>>All Statuses</option>
+        <option value="Submitted" <%= filters.status === 'Submitted' ? 'selected' : '' %>>Submitted</option>
+        <option value="Under Review" <%= filters.status === 'Under Review' ? 'selected' : '' %>>Under Review</option>
+        <option value="Scheduled" <%= filters.status === 'Scheduled' ? 'selected' : '' %>>Scheduled</option>
+        <option value="Certificate Issued" <%= filters.status === 'Certificate Issued' ? 'selected' : '' %>>Certificate Issued</option>
+        <option value="Rejected" <%= filters.status === 'Rejected' ? 'selected' : '' %>>Rejected</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label for="districtFilter">District</label>
+      <select id="districtFilter" name="district">
+        <option value="all" <%= filters.district === 'all' ? 'selected' : '' %>>All Districts</option>
+        <% districts.forEach(d => { %>
+          <option value="<%= d %>" <%= filters.district === d ? 'selected' : '' %>><%= d %></option>
+        <% }) %>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label for="typeFilter">Instrument Type</label>
+      <select id="typeFilter" name="instrument_type">
+        <option value="all" <%= filters.instrument_type === 'all' ? 'selected' : '' %>>All Types</option>
+        <% instrumentTypes.forEach(t => { %>
+          <option value="<%= t %>" <%= filters.instrument_type === t ? 'selected' : '' %>><%= t %></option>
+        <% }) %>
+      </select>
+    </div>
+
+    <div class="filter-group" style="min-width: 200px;">
+      <label for="searchInput">Search Merchant or Serial</label>
+      <input type="text" id="searchInput" name="search" placeholder="Business, GSTIN, Serial, App No..." value="<%= filters.search %>">
+    </div>
+
+    <div class="filter-group" style="flex: 0;">
+      <label>&nbsp;</label>
+      <div style="display: flex; gap: 6px;">
+        <button type="submit" class="btn btn-primary btn-sm" style="padding: 10px 16px;">Apply Filters</button>
+        <a href="/inspector/applications" class="btn btn-outline btn-sm" style="padding: 10px 12px;">Reset</a>
+      </div>
+    </div>
+
+  </form>
+
+  <!-- Applications Table Card -->
+  <div class="card">
+    <div class="card-header">
+      <h3>Applications Found (<%= applications.length %>)</h3>
+    </div>
+
+    <% if (applications.length === 0) { %>
+      <div style="text-align: center; padding: 48px; color: var(--text-muted);">
+        <p style="font-size: 2.2rem;">🔍</p>
+        <h4 style="margin-top: 8px; color: var(--primary-navy);">No matching applications</h4>
+        <p style="font-size: 0.88rem; margin-top: 4px;">Try loosening your filters or resetting the search query.</p>
+        <a href="/inspector/applications" class="btn btn-outline btn-sm" style="margin-top: 14px;">Reset Filters</a>
+      </div>
+    <% } else { %>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Application No</th>
+              <th>Commercial Establishment</th>
+              <th>District & State</th>
+              <th>Verification Type</th>
+              <th>Instruments & Serials</th>
+              <th>Date Submitted</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% applications.forEach(app => { %>
+              <tr>
+                <td>
+                  <a href="/inspector/applications/<%= app.id %>" style="font-family: monospace; font-weight: 700; color: var(--primary-navy); text-decoration: none;">
+                    <%= app.application_no %>
+                  </a>
+                </td>
+                <td>
+                  <strong><%= app.business_name %></strong>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);">
+                    Rep: <%= app.merchant_name %> &bull; <span style="font-family: monospace;"><%= app.gstin %></span>
+                  </div>
+                </td>
+                <td><%= app.district %>, <%= app.state %></td>
+                <td>
+                  <span class="badge badge-info" style="font-size: 0.7rem;"><%= app.type %></span>
+                </td>
+                <td>
+                  <strong><%= app.instrument_count %></strong> unit(s)
+                  <div style="font-size: 0.75rem; color: var(--text-muted); max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    <%= app.instrument_types %>
+                  </div>
+                </td>
+                <td><%= new Date(app.submitted_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) %></td>
+                <td>
+                  <% 
+                    let bClass = 'badge-pending';
+                    if (app.status === 'Certificate Issued') bClass = 'badge-valid';
+                    else if (app.status === 'Rejected') bClass = 'badge-rejected';
+                    else if (app.status === 'Scheduled') bClass = 'badge-scheduled';
+                    else if (app.status === 'Under Review') bClass = 'badge-review';
+                  %>
+                  <span class="badge <%= bClass %>"><%= app.status %></span>
+                </td>
+                <td>
+                  <a href="/inspector/applications/<%= app.id %>" class="btn btn-primary btn-sm">
+                    Review & Verify &rarr;
+                  </a>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+
+</div>
+
+<%- include('../partials/footer') %>

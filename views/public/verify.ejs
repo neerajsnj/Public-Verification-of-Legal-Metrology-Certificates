@@ -1,0 +1,279 @@
+<%- include('../partials/header') %>
+
+<div class="verify-container">
+
+  <!-- Lookup Search Box -->
+  <div class="cert-search-card">
+    <h2>Public Verification of Legal Metrology Certificates</h2>
+    <p style="color: var(--text-muted); font-size: 0.9rem;">
+      Enter the unique certificate number or scan the QR code printed on the instrument to authenticate legal compliance under the Legal Metrology Act, 2009.
+    </p>
+
+    <form action="/verify" method="GET" class="cert-search-form">
+      <input type="text" name="certNo" class="cert-search-input" placeholder="e.g. LM-2026-DL-104920" value="<%= certNo || '' %>" required>
+      <button type="submit" class="btn btn-primary" style="padding: 12px 24px;">Search Record</button>
+    </form>
+
+    <!-- Quick Demo Shortcuts for Hackathon Judges -->
+    <div style="margin-top: 16px; font-size: 0.8rem; color: var(--text-muted); display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap;">
+      <span style="font-weight: 600;">Demo Certificates:</span>
+      <a href="/verify/LM-2026-DL-104920" class="badge badge-valid" style="text-decoration: none; padding: 4px 10px;">🟢 Valid (LM-2026-DL-104920)</a>
+      <a href="/verify/LM-2025-MH-084219" class="badge badge-pending" style="text-decoration: none; padding: 4px 10px;">🟡 Expiring Soon (LM-2025-MH-084219)</a>
+      <a href="/verify/LM-2026-DL-002158" class="badge badge-revoked" style="text-decoration: none; padding: 4px 10px;">🔴 Revoked (LM-2026-DL-002158)</a>
+    </div>
+  </div>
+
+  <% if (searched && !certificate) { %>
+    <!-- Not Found State -->
+    <div class="not-found-card">
+      <div class="not-found-icon">⚠️</div>
+      <h2>Certificate Record Not Found</h2>
+      <p>
+        No verified record was found matching certificate number <strong>"<%= certNo %>"</strong> in the National Legal Metrology database.
+      </p>
+      <div style="background: #FFF1F2; border: 1px solid #FECDD3; border-radius: var(--radius-sm); padding: 14px; max-width: 550px; margin: 0 auto; text-align: left; font-size: 0.85rem; color: #9F1239;">
+        <strong>Statutory Advisory:</strong> Commercial transaction using an unverified or forged certificate is a cognizable offense punishable under Section 44 of the Legal Metrology Act, 2009. Please report counterfeit certificates to the Directorate of Legal Metrology.
+      </div>
+    </div>
+
+  <% } else if (certificate) { %>
+    <!-- Verified Certificate Record Document Card -->
+    <div class="cert-document-card">
+      
+      <!-- Official Header -->
+      <div class="cert-doc-header">
+        <img src="/images/emblem.svg" alt="National Emblem" class="cert-doc-emblem">
+        <h1>GOVERNMENT OF INDIA &bull; MINISTRY OF CONSUMER AFFAIRS</h1>
+        <p>DIRECTORATE OF LEGAL METROLOGY &bull; DIGITAL CERTIFICATE OF VERIFICATION</p>
+      </div>
+
+      <!-- Status Hero Banner -->
+      <div class="status-hero-banner <%= certificate.effectiveStatus %>">
+        <div class="status-hero-content">
+          <div class="status-icon-circle">
+            <% if (certificate.effectiveStatus === 'valid') { %>
+              ✓
+            <% } else if (certificate.effectiveStatus === 'expired') { %>
+              ⏱
+            <% } else { %>
+              ✕
+            <% } %>
+          </div>
+          <div>
+            <div class="status-hero-title">
+              <% if (certificate.effectiveStatus === 'valid') { %>
+                STATUS: OFFICIALLY VERIFIED & VALID
+              <% } else if (certificate.effectiveStatus === 'expired') { %>
+                STATUS: EXPIRED - RE-VERIFICATION REQUIRED
+              <% } else { %>
+                STATUS: CERTIFICATE REVOKED / CANCELLED
+              <% } %>
+            </div>
+            <div class="status-hero-subtitle">
+              Verified under Legal Metrology (General) Rules, 2011 &bull; Traceable to Regional Reference Standard Labs (RRSL)
+            </div>
+          </div>
+        </div>
+
+        <div class="cert-no-tag">
+          <%= certificate.cert_no %>
+        </div>
+      </div>
+
+      <!-- Body Content -->
+      <div class="cert-doc-body">
+
+        <!-- Revocation Notice if Revoked -->
+        <% if (certificate.cert_status === 'revoked') { %>
+          <div class="revocation-alert-box">
+            <h4>⚠️ OFFICIAL NOTICE OF REVOCATION / CEASE-AND-DESIST ORDER</h4>
+            <p><strong>Reason for Revocation:</strong> <%= certificate.revocation_reason %></p>
+            <p style="margin-top: 6px; font-size: 0.8rem; color: #9F1239;">
+              <strong>Revoked On:</strong> <%= new Date(certificate.revoked_at).toLocaleString('en-IN', { dateStyle: 'long', timeStyle: 'short' }) %> &bull; 
+              Commercial use of this instrument is strictly prohibited by law.
+            </p>
+          </div>
+        <% } %>
+
+        <!-- 1. Establishment Details -->
+        <div class="cert-section">
+          <div class="cert-section-title">
+            <span>1.</span> Commercial Establishment / Merchant Particulars
+          </div>
+          <div class="cert-grid">
+            <div class="cert-field-item">
+              <div class="cert-field-label">Business / Trading Name</div>
+              <div class="cert-field-value"><%= certificate.business_name %></div>
+            </div>
+            <div class="cert-field-item">
+              <div class="cert-field-label">GSTIN Identification</div>
+              <div class="cert-field-value" style="font-family: monospace;"><%= certificate.gstin %></div>
+            </div>
+            <div class="cert-field-item">
+              <div class="cert-field-label">Authorized Signatory</div>
+              <div class="cert-field-value"><%= certificate.merchant_name %></div>
+            </div>
+            <div class="cert-field-item" style="grid-column: 1 / -1;">
+              <div class="cert-field-label">Registered Premises Address</div>
+              <div class="cert-field-value"><%= certificate.merchant_address %>, <%= certificate.merchant_district %>, <%= certificate.merchant_state %> - <%= certificate.merchant_pincode %></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Instrument Details -->
+        <div class="cert-section">
+          <div class="cert-section-title">
+            <span>2.</span> Particulars of Weighing / Measuring Instrument
+          </div>
+          <div class="cert-grid">
+            <div class="cert-field-item">
+              <div class="cert-field-label">Instrument Category / Type</div>
+              <div class="cert-field-value"><%= certificate.instrument_type %></div>
+            </div>
+            <div class="cert-field-item">
+              <div class="cert-field-label">Make & Model</div>
+              <div class="cert-field-value"><%= certificate.make_model %></div>
+            </div>
+            <div class="cert-field-item">
+              <div class="cert-field-label">Serial Number (Unique)</div>
+              <div class="cert-field-value" style="font-family: monospace; color: var(--primary-navy);"><%= certificate.serial_no %></div>
+            </div>
+            <div class="cert-field-item">
+              <div class="cert-field-label">Accuracy Class</div>
+              <div class="cert-field-value"><%= certificate.accuracy_class %></div>
+            </div>
+            <div class="cert-field-item">
+              <div class="cert-field-label">Capacity Range</div>
+              <div class="cert-field-value"><%= certificate.min_capacity %> to <%= certificate.max_capacity %> <%= certificate.capacity_unit %></div>
+            </div>
+            <div class="cert-field-item">
+              <div class="cert-field-label">Verification Scale Interval (e)</div>
+              <div class="cert-field-value"><%= certificate.e_value %> g</div>
+            </div>
+            <div class="cert-field-item">
+              <div class="cert-field-label">Year of Manufacture</div>
+              <div class="cert-field-value"><%= certificate.year_of_manufacture %></div>
+            </div>
+            <div class="cert-field-item">
+              <div class="cert-field-label">Location of Use at Site</div>
+              <div class="cert-field-value"><%= certificate.instrument_location %></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Metrological Verification Tests Summary -->
+        <div class="cert-section">
+          <div class="cert-section-title">
+            <span>3.</span> Calibration & Metrological Test Summary
+          </div>
+
+          <% if (certificate.testReadings && certificate.testReadings.length > 0) { %>
+            <div class="table-responsive" style="margin-bottom: 12px;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Test Point</th>
+                    <th>Nominal Reference Load</th>
+                    <th>Observed Reading</th>
+                    <th>Observed Error</th>
+                    <th>MPE Tolerance</th>
+                    <th>Compliance Result</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% certificate.testReadings.forEach((reading, idx) => { %>
+                    <tr>
+                      <td>#<%= idx + 1 %></td>
+                      <td><strong><%= reading.nominalLoad %></strong> <%= certificate.capacity_unit %></td>
+                      <td><%= reading.observedReading %> <%= certificate.capacity_unit %></td>
+                      <td style="font-family: monospace; font-weight: 700; color: <%= reading.error === 0 ? 'var(--gov-green)' : (Math.abs(reading.error) > reading.tolerance ? 'var(--gov-red)' : 'var(--text-main)') %>;">
+                        <%= (reading.error >= 0 ? '+' : '') + reading.error %>
+                      </td>
+                      <td>&plusmn;<%= reading.tolerance %></td>
+                      <td>
+                        <span class="badge <%= reading.pass ? 'badge-pass' : 'badge-fail' %>">
+                          <%= reading.pass ? 'PASSED (Within MPE)' : 'FAILED' %>
+                        </span>
+                      </td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          <% } %>
+
+          <div style="background: #F8FAFC; border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 12px 16px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-size: 0.85rem;">
+            <div>
+              <span style="color: var(--text-muted);">Maximum Recorded Error:</span>
+              <strong style="color: var(--primary-navy); margin-left: 6px;"><%= certificate.max_error != null ? certificate.max_error : '0.000' %> g</strong>
+            </div>
+            <div>
+              <span style="color: var(--text-muted);">Prescribed Tolerance (MPE):</span>
+              <strong style="color: var(--primary-navy); margin-left: 6px;">&plusmn;<%= certificate.tolerance_limit || '1.0' %> g</strong>
+            </div>
+            <div>
+              <span style="color: var(--text-muted);">Overall Metrological Decision:</span>
+              <strong style="color: var(--gov-green); margin-left: 6px;">VERIFIED & CONFORMANT</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Issuing Authority & Validity -->
+        <div class="cert-section" style="margin-bottom: 0;">
+          <div class="cert-section-title">
+            <span>4.</span> Issuance Details & Validity Window
+          </div>
+          <div class="cert-grid">
+            <div class="cert-field-item">
+              <div class="cert-field-label">Date of Verification</div>
+              <div class="cert-field-value"><%= new Date(certificate.issued_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) %></div>
+            </div>
+            <div class="cert-field-item">
+              <div class="cert-field-label">Valid Until (Expiry Date)</div>
+              <div class="cert-field-value" style="color: <%= certificate.effectiveStatus === 'expired' ? 'var(--gov-red)' : 'var(--gov-green)' %>;">
+                <%= new Date(certificate.valid_until).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) %>
+              </div>
+            </div>
+            <div class="cert-field-item">
+              <div class="cert-field-label">Inspecting Officer</div>
+              <div class="cert-field-value"><%= certificate.inspector_name || 'Legal Metrology Officer' %></div>
+            </div>
+            <div class="cert-field-item">
+              <div class="cert-field-label">Officer Employee ID & Zone</div>
+              <div class="cert-field-value"><%= certificate.inspector_emp_id || 'LM-DL-2024' %> (<%= certificate.inspector_district || 'Central' %>)</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer Action & QR Block -->
+      <div class="cert-footer-panel">
+        <div class="cert-qr-block">
+          <% if (certificate.qrDataUrl) { %>
+            <img src="<%= certificate.qrDataUrl %>" alt="Verification QR Code" class="cert-qr-img">
+          <% } %>
+          <div class="cert-qr-text">
+            <strong>Cryptographic Verification QR</strong>
+            <p style="margin-top: 4px; font-size: 0.75rem;">Scan this QR code with any mobile scanner to confirm this digital record against the central Metrology registry.</p>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 12px; align-items: center;">
+          <% if (certificate.pdf_path) { %>
+            <a href="<%= certificate.pdf_path %>" target="_blank" class="btn btn-primary" download>
+              📄 Download Official PDF Certificate
+            </a>
+          <% } %>
+          <button type="button" class="btn btn-outline" onclick="window.print()">
+            🖨️ Print
+          </button>
+        </div>
+      </div>
+
+    </div>
+  <% } %>
+
+</div>
+
+<%- include('../partials/footer') %>

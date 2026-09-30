@@ -1,0 +1,82 @@
+<%- include('../partials/header') %>
+
+<div class="container">
+  <div class="page-header">
+    <div>
+      <h1>My Weighing & Measuring Instruments</h1>
+      <p>Registered inventory of instruments subject to verification under The Legal Metrology Act, 2009</p>
+    </div>
+    <div class="page-actions">
+      <a href="/merchant/instruments/new" class="btn btn-primary">+ Add New Instrument</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <% if (instruments.length === 0) { %>
+      <div style="text-align: center; padding: 48px; color: var(--text-muted);">
+        <p style="font-size: 2.5rem;">⚖️</p>
+        <h3 style="margin-top: 10px; color: var(--primary-navy);">No instruments added yet</h3>
+        <p style="font-size: 0.9rem; margin-top: 4px;">Start by registering your electronic scales, fuel dispensers, or weighbridges.</p>
+        <a href="/merchant/instruments/new" class="btn btn-primary" style="margin-top: 16px;">Register First Instrument</a>
+      </div>
+    <% } else { %>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Instrument Type</th>
+              <th>Make & Model</th>
+              <th>Serial Number</th>
+              <th>Capacity Range</th>
+              <th>Accuracy Class</th>
+              <th>Scale Interval (e)</th>
+              <th>Location</th>
+              <th>Active Certificate</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% instruments.forEach(inst => { %>
+              <tr>
+                <td>
+                  <strong><%= inst.type %></strong>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);">Mfg Year: <%= inst.year_of_manufacture %></div>
+                </td>
+                <td><%= inst.make_model %></td>
+                <td>
+                  <span style="font-family: monospace; font-weight: 700; color: var(--primary-navy);"><%= inst.serial_no %></span>
+                </td>
+                <td><%= inst.min_capacity %> - <%= inst.max_capacity %> <%= inst.capacity_unit %></td>
+                <td>
+                  <span class="badge badge-info"><%= inst.accuracy_class %></span>
+                </td>
+                <td><%= inst.e_value %> g</td>
+                <td><%= inst.location %></td>
+                <td>
+                  <% if (inst.active_cert_no) { %>
+                    <a href="/verify/<%= inst.active_cert_no %>" class="badge badge-valid" style="text-decoration: none;" title="Valid until <%= inst.cert_valid_until %>">
+                      ✓ <%= inst.active_cert_no %>
+                    </a>
+                  <% } else { %>
+                    <span class="badge badge-pending">Unverified</span>
+                  <% } %>
+                </td>
+                <td>
+                  <div style="display: flex; gap: 6px;">
+                    <a href="/merchant/instruments/<%= inst.id %>/edit" class="btn btn-outline btn-sm" title="Edit instrument specs">Edit</a>
+                    <form action="/merchant/instruments/<%= inst.id %>/delete" method="POST" onsubmit="return confirm('Are you sure you want to delete instrument <%= inst.serial_no %>?');" style="display: inline;">
+                      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                      <button type="submit" class="btn btn-outline btn-sm" style="color: var(--gov-red);" title="Remove instrument">Delete</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

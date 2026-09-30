@@ -1,0 +1,59 @@
+<nav class="main-nav">
+  <div class="nav-brand">
+    <a href="/">
+      <img src="/images/logo.svg" alt="MetroVerify" class="nav-logo-svg">
+    </a>
+  </div>
+
+  <ul class="nav-links">
+    <li><a href="/" class="<%= currentPath === '/' ? 'active' : '' %>">Home</a></li>
+    <li><a href="/verify" class="<%= currentPath.startsWith('/verify') ? 'active' : '' %>">🔍 Verify Certificate</a></li>
+
+    <% if (currentUser) { %>
+      <% if (currentUser.role === 'merchant') { %>
+        <li><a href="/merchant/dashboard" class="<%= currentPath === '/merchant/dashboard' ? 'active' : '' %>">Dashboard</a></li>
+        <li><a href="/merchant/instruments" class="<%= currentPath.startsWith('/merchant/instruments') ? 'active' : '' %>">My Instruments</a></li>
+        <li><a href="/merchant/applications" class="<%= currentPath.startsWith('/merchant/applications') ? 'active' : '' %>">Applications</a></li>
+        <li><a href="/merchant/certificates" class="<%= currentPath.startsWith('/merchant/certificates') ? 'active' : '' %>">Certificates</a></li>
+      <% } else if (currentUser.role === 'inspector') { %>
+        <li><a href="/inspector/dashboard" class="<%= currentPath === '/inspector/dashboard' ? 'active' : '' %>">Dashboard</a></li>
+        <li><a href="/inspector/applications" class="<%= currentPath.startsWith('/inspector/applications') ? 'active' : '' %>">Applications Queue</a></li>
+        <li><a href="/inspector/certificates" class="<%= currentPath.startsWith('/inspector/certificates') ? 'active' : '' %>">Certificates</a></li>
+        <li><a href="/inspector/analytics" class="<%= currentPath.startsWith('/inspector/analytics') ? 'active' : '' %>">Analytics</a></li>
+        <li><a href="/inspector/audit-log" class="<%= currentPath.startsWith('/inspector/audit-log') ? 'active' : '' %>">Audit Trail</a></li>
+      <% } %>
+
+      <!-- In-app Notification Bell -->
+      <li>
+        <button id="notifBellBtn" class="notif-bell-btn" title="Simulated SMS & Email Alerts">
+          🔔
+          <% if (unreadNotifsCount > 0) { %>
+            <span id="notifBadge" class="notif-badge-count"><%= unreadNotifsCount %></span>
+          <% } %>
+        </button>
+      </li>
+
+      <!-- User Profile Badge -->
+      <li>
+        <div class="user-nav-badge">
+          <div class="user-avatar-circle">
+            <%= currentUser.name.charAt(0).toUpperCase() %>
+          </div>
+          <span style="font-size: 0.85rem; font-weight: 600;"><%= currentUser.name.split(' ')[0] %> (<%= currentUser.role %>)</span>
+        </div>
+      </li>
+
+      <li>
+        <form action="/auth/logout" method="POST" style="display: inline;">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <button type="submit" class="btn btn-outline btn-sm" style="color: #FFF; border-color: rgba(255,255,255,0.3);">Logout</button>
+        </form>
+      </li>
+
+    <% } else { %>
+      <li><a href="/auth/login?role=merchant" class="<%= currentPath === '/auth/login' ? 'active' : '' %>">Merchant Login</a></li>
+      <li><a href="/auth/login?role=inspector" class="highlight-link">Inspector Login</a></li>
+      <li><a href="/auth/register" class="btn btn-saffron btn-sm" style="font-weight: 700;">Merchant Register</a></li>
+    <% } %>
+  </ul>
+</nav>

@@ -1,0 +1,188 @@
+<%- include('../partials/header') %>
+
+<!-- Landing Hero Section -->
+<section style="background: linear-gradient(135deg, #0B2545 0%, #133E87 100%); color: #FFFFFF; padding: 60px 24px; position: relative; overflow: hidden; border-bottom: 5px solid var(--accent-saffron);">
+  <div class="container" style="position: relative; z-index: 2;">
+    <div style="max-width: 800px;">
+      <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255, 153, 51, 0.15); border: 1px solid rgba(255, 153, 51, 0.4); padding: 6px 14px; border-radius: var(--radius-full); font-size: 0.8rem; font-weight: 700; color: #FFB366; margin-bottom: 16px;">
+        <span>★</span> <%= typeof lang !== 'undefined' && lang === 'hi' ? 'स्मार्ट इंडिया हैकाथॉन 2026' : 'Smart India Hackathon 2026' %> &bull; Problem Statement SIH26036
+      </div>
+
+      <h1 style="font-family: var(--font-heading); font-size: 2.6rem; font-weight: 800; line-height: 1.2; margin-bottom: 16px;">
+        <% if (typeof lang !== 'undefined' && lang === 'hi') { %>
+          बाट एवं माप उपकरणों का ऑनलाइन सत्यापन पोर्टल
+        <% } else { %>
+          Online Verification System for Weighing & Measuring Instruments
+        <% } %>
+      </h1>
+
+      <p style="font-size: 1.1rem; color: #E2E8F0; line-height: 1.6; margin-bottom: 28px;">
+        <% if (typeof lang !== 'undefined' && lang === 'hi') { %>
+          विधिक मापविज्ञान अधिनियम, 2009 के अंतर्गत पेपरलेस सत्यापन। व्यापारी उपकरणों का ऑनलाइन पंजीकरण करें, अधिकारी शेड्यूल करें तथा क्यूआर कोड युक्त प्रामाणिक डिजिटल प्रमाण पत्र प्राप्त करें।
+        <% } else { %>
+          A streamlined, paperless governance platform under The Legal Metrology Act, 2009. Merchants apply online, officers review and record test calibration against permissible tolerances, and tamper-proof QR-coded digital certificates are generated for instant public verification.
+        <% } %>
+      </p>
+
+      <div style="display: flex; gap: 14px; flex-wrap: wrap;">
+        <a href="/verify" class="btn btn-saffron btn-lg" style="box-shadow: 0 4px 14px rgba(255, 153, 51, 0.4);">
+          🔍 <%= typeof lang !== 'undefined' && lang === 'hi' ? 'प्रमाणपत्र सत्यापित करें' : 'Verify a Certificate' %>
+        </a>
+        <a href="/auth/login?role=merchant" class="btn btn-outline btn-lg" style="color: #FFF; border-color: rgba(255, 255, 255, 0.35); background: rgba(255,255,255,0.06);">
+          <%= typeof lang !== 'undefined' && lang === 'hi' ? 'व्यापारी लॉगिन' : 'Merchant Portal' %> &rarr;
+        </a>
+        <a href="/auth/login?role=inspector" class="btn btn-outline btn-lg" style="color: #CBD5E1; border-color: rgba(255, 255, 255, 0.2); background: transparent;">
+          <%= typeof lang !== 'undefined' && lang === 'hi' ? 'निरीक्षक लॉगिन' : 'Inspector Portal' %>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Background Geometry Accent -->
+  <div style="position: absolute; right: -50px; top: 20px; opacity: 0.08; width: 450px; height: 450px; pointer-events: none;">
+    <img src="/images/logo.svg" alt="" style="width: 100%; height: 100%; filter: brightness(0) invert(1);">
+  </div>
+</section>
+
+<!-- Live Portal Statistics Counter Bar -->
+<section style="background: #FFFFFF; border-bottom: 1px solid var(--border-light); padding: 24px 0; box-shadow: var(--shadow-sm);">
+  <div class="container">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; text-align: center;">
+      <div>
+        <div style="font-family: var(--font-heading); font-size: 2rem; font-weight: 800; color: var(--primary-navy-dark);"><%= stats.totalInstruments %></div>
+        <div style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase;">Instruments Registered</div>
+      </div>
+      <div>
+        <div style="font-family: var(--font-heading); font-size: 2rem; font-weight: 800; color: var(--gov-green);"><%= stats.verifiedInstruments %></div>
+        <div style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase;">Active Digital Certificates</div>
+      </div>
+      <div>
+        <div style="font-family: var(--font-heading); font-size: 2rem; font-weight: 800; color: var(--accent-saffron-dark);"><%= stats.activeMerchants %></div>
+        <div style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase;">Registered Establishments</div>
+      </div>
+      <div>
+        <div style="font-family: var(--font-heading); font-size: 2rem; font-weight: 800; color: var(--primary-navy);"><%= stats.activeInspectors %></div>
+        <div style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase;">Jurisdictional Officers</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 Role Portals Cards -->
+<section class="container" style="padding-top: 48px; padding-bottom: 48px;">
+  <div style="text-align: center; max-width: 650px; margin: 0 auto 36px;">
+    <h2 style="font-family: var(--font-heading); font-size: 1.8rem; color: var(--primary-navy-dark); font-weight: 700;">
+      <%= typeof lang !== 'undefined' && lang === 'hi' ? 'विधिक मापविज्ञान ई-सेवाएं' : 'Comprehensive Legal Metrology Services' %>
+    </h2>
+    <p style="color: var(--text-muted); margin-top: 6px; font-size: 0.95rem;">
+      Unified digital infrastructure connecting retail merchants, legal metrology inspecting officers, and consumer citizens.
+    </p>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
+    <!-- Merchant Card -->
+    <div class="card" style="border-top: 4px solid var(--accent-saffron);">
+      <div style="width: 48px; height: 48px; background: var(--accent-saffron-light); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 16px;">
+        🏪
+      </div>
+      <h3 style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 700; color: var(--primary-navy);">
+        <%= typeof lang !== 'undefined' && lang === 'hi' ? 'व्यापारी सेवा पोर्टल' : 'Merchant Portal' %>
+      </h3>
+      <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; margin: 10px 0 18px;">
+        Register your weighing scales, fuel dispensers, or weighbridges with serial numbers, upload proof of purchase or previous certificates, and request initial or annual re-verification online.
+      </p>
+      <ul style="list-style: none; margin-bottom: 20px; font-size: 0.85rem; color: var(--text-main); display: flex; flex-direction: column; gap: 8px;">
+        <li>✓ Digital Instrument Inventory Management</li>
+        <li>✓ Real-time Application Status Timeline</li>
+        <li>✓ 30-Day Certificate Expiry Reminders</li>
+        <li>✓ Instant PDF Download with Embedded QR Code</li>
+      </ul>
+      <div style="display: flex; gap: 10px;">
+        <a href="/auth/login?role=merchant" class="btn btn-primary btn-block">Merchant Login</a>
+        <a href="/auth/register" class="btn btn-outline">Register</a>
+      </div>
+    </div>
+
+    <!-- Inspector Card -->
+    <div class="card" style="border-top: 4px solid var(--primary-navy);">
+      <div style="width: 48px; height: 48px; background: #EFF6FF; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 16px;">
+        ⚖️
+      </div>
+      <h3 style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 700; color: var(--primary-navy);">
+        <%= typeof lang !== 'undefined' && lang === 'hi' ? 'विधिक मापविज्ञान अधिकारी' : 'Inspector Portal' %>
+      </h3>
+      <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; margin: 10px 0 18px;">
+        Manage jurisdictional verification applications, schedule on-site or lab appointments, record test readings with automated tolerance checks, and issue official digitally signed certificates.
+      </p>
+      <ul style="list-style: none; margin-bottom: 20px; font-size: 0.85rem; color: var(--text-main); display: flex; flex-direction: column; gap: 8px;">
+        <li>✓ Jurisdictional Queue & Filter Engine</li>
+        <li>✓ Automated Error vs MPE Tolerance Flagging</li>
+        <li>✓ 1-Click Tamper-Proof Certificate Generator</li>
+        <li>✓ Revocation Management & Real-time Analytics</li>
+      </ul>
+      <a href="/auth/login?role=inspector" class="btn btn-primary btn-block">Inspector Login</a>
+    </div>
+
+    <!-- Public Verify Card -->
+    <div class="card" style="border-top: 4px solid var(--gov-green);">
+      <div style="width: 48px; height: 48px; background: var(--gov-green-light); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 16px;">
+        🛡️
+      </div>
+      <h3 style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 700; color: var(--primary-navy);">
+        <%= typeof lang !== 'undefined' && lang === 'hi' ? 'सार्वजनिक सत्यापन' : 'Public Authenticity Verification' %>
+      </h3>
+      <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; margin: 10px 0 18px;">
+        Consumers and enforcement officials can scan the QR code affixed to any commercial scale or enter the certificate number to instantly verify authenticity, validity status, and calibrated accuracy.
+      </p>
+      <ul style="list-style: none; margin-bottom: 20px; font-size: 0.85rem; color: var(--text-main); display: flex; flex-direction: column; gap: 8px;">
+        <li>✓ Zero Login Required for Public Verification</li>
+        <li>✓ Real-time VALID / EXPIRED / REVOKED Status</li>
+        <li>✓ Verification Officer Details & Test Readings</li>
+        <li>✓ Traceable to National Standards (NPL/RRSL)</li>
+      </ul>
+      <a href="/verify" class="btn btn-success btn-block">Verify a Certificate Now</a>
+    </div>
+  </div>
+</section>
+
+<!-- End-to-End Verification Workflow -->
+<section style="background: #FFFFFF; border-top: 1px solid var(--border-light); border-bottom: 1px solid var(--border-light); padding: 50px 0;">
+  <div class="container">
+    <div style="text-align: center; max-width: 650px; margin: 0 auto 36px;">
+      <h2 style="font-family: var(--font-heading); font-size: 1.7rem; color: var(--primary-navy-dark); font-weight: 700;">
+        Digital Verification Lifecycle
+      </h2>
+      <p style="color: var(--text-muted); margin-top: 4px; font-size: 0.92rem;">
+        How MetroVerify transforms traditional paper stamping into an end-to-end verifiable digital workflow.
+      </p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px;">
+      <div style="text-align: center; padding: 20px;">
+        <div style="width: 50px; height: 50px; border-radius: 50%; background: var(--primary-navy); color: #FFF; font-weight: 800; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px;">1</div>
+        <h4 style="font-size: 1rem; color: var(--primary-navy); margin-bottom: 6px;">Register Instrument</h4>
+        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4;">Merchant adds scale type, make, serial number, max/min capacity, and accuracy class into inventory.</p>
+      </div>
+
+      <div style="text-align: center; padding: 20px;">
+        <div style="width: 50px; height: 50px; border-radius: 50%; background: var(--primary-navy); color: #FFF; font-weight: 800; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px;">2</div>
+        <h4 style="font-size: 1rem; color: var(--primary-navy); margin-bottom: 6px;">Apply & Upload Docs</h4>
+        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4;">Merchant selects instruments, preferred appointment date, mode (lab or on-site), and uploads tax invoice or prior certificate.</p>
+      </div>
+
+      <div style="text-align: center; padding: 20px;">
+        <div style="width: 50px; height: 50px; border-radius: 50%; background: var(--accent-saffron); color: #0B2545; font-weight: 800; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px;">3</div>
+        <h4 style="font-size: 1rem; color: var(--primary-navy); margin-bottom: 6px;">Inspect & Record Test</h4>
+        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4;">Inspector reviews application, schedules visit, enters nominal vs observed readings. System auto-checks MPE tolerances.</p>
+      </div>
+
+      <div style="text-align: center; padding: 20px;">
+        <div style="width: 50px; height: 50px; border-radius: 50%; background: var(--gov-green); color: #FFF; font-weight: 800; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px;">4</div>
+        <h4 style="font-size: 1rem; color: var(--primary-navy); margin-bottom: 6px;">Issue QR Certificate</h4>
+        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4;">On approval, an official PDF certificate with scannable QR code is generated instantly. Public can verify in real-time.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%- include('../partials/footer') %>

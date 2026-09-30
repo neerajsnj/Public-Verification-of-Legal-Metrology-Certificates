@@ -1,0 +1,311 @@
+/* MetroVerify - Public Certificate Verification Styles */
+
+.verify-container {
+  max-width: 900px;
+  margin: 30px auto;
+  padding: 0 16px;
+}
+
+/* Certificate Lookup Search Box */
+.cert-search-card {
+  background: #FFFFFF;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-md);
+  padding: 28px;
+  margin-bottom: 28px;
+  text-align: center;
+}
+
+.cert-search-card h2 {
+  font-family: var(--font-heading);
+  font-size: 1.45rem;
+  color: var(--primary-navy-dark);
+  margin-bottom: 8px;
+}
+
+.cert-search-form {
+  display: flex;
+  gap: 10px;
+  max-width: 600px;
+  margin: 18px auto 0;
+}
+
+.cert-search-input {
+  flex: 1;
+  padding: 12px 16px;
+  font-size: 1rem;
+  font-family: monospace;
+  text-transform: uppercase;
+  border: 2px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+}
+
+.cert-search-input:focus {
+  border-color: var(--primary-navy);
+}
+
+/* Verification Result Document Card */
+.cert-document-card {
+  background: #FFFFFF;
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--border-medium);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  position: relative;
+}
+
+/* Watermark Seal Background */
+.cert-document-card::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  height: 400px;
+  background-image: url('/images/emblem.svg');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  opacity: 0.035;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.cert-doc-header {
+  background: var(--primary-navy-dark);
+  color: #FFFFFF;
+  padding: 24px;
+  text-align: center;
+  position: relative;
+  border-bottom: 3px solid var(--accent-saffron);
+}
+
+.cert-doc-emblem {
+  height: 54px;
+  width: auto;
+  margin-bottom: 8px;
+  filter: brightness(0) invert(1);
+}
+
+.cert-doc-header h1 {
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.cert-doc-header p {
+  font-size: 0.82rem;
+  color: #CBD5E1;
+  margin-top: 4px;
+}
+
+/* Status Hero Badge */
+.status-hero-banner {
+  padding: 18px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  border-bottom: 1px solid var(--border-light);
+  position: relative;
+  z-index: 2;
+}
+
+.status-hero-banner.valid {
+  background: #F0FDF4;
+  border-left: 8px solid var(--gov-green);
+}
+
+.status-hero-banner.expired {
+  background: #FFFBEB;
+  border-left: 8px solid var(--gov-amber);
+}
+
+.status-hero-banner.revoked {
+  background: #FEF2F2;
+  border-left: 8px solid var(--gov-red);
+}
+
+.status-hero-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.status-icon-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+}
+
+.valid .status-icon-circle { background: #DCFCE7; color: var(--gov-green); }
+.expired .status-icon-circle { background: #FEF3C7; color: var(--gov-amber); }
+.revoked .status-icon-circle { background: #FEE2E2; color: var(--gov-red); }
+
+.status-hero-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+.valid .status-hero-title { color: #166534; }
+.expired .status-hero-title { color: #92400E; }
+.revoked .status-hero-title { color: #991B1B; }
+
+.status-hero-subtitle {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.cert-no-tag {
+  font-family: monospace;
+  font-size: 1.15rem;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  background: #FFFFFF;
+  border: 1px solid var(--border-medium);
+  color: var(--primary-navy-dark);
+}
+
+/* Certificate Body Sections */
+.cert-doc-body {
+  padding: 24px;
+  position: relative;
+  z-index: 2;
+}
+
+.cert-section {
+  margin-bottom: 24px;
+}
+
+.cert-section-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--primary-navy);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid var(--border-light);
+  padding-bottom: 6px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cert-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.cert-field-item {
+  background: #F8FAFC;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-light);
+}
+
+.cert-field-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.cert-field-value {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+/* Revocation Notice Box */
+.revocation-alert-box {
+  background: #FFF1F2;
+  border: 2px dashed #FDA4AF;
+  border-radius: var(--radius-md);
+  padding: 18px;
+  margin-bottom: 24px;
+}
+
+.revocation-alert-box h4 {
+  color: #9F1239;
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.revocation-alert-box p {
+  color: #881337;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+/* QR & Actions Footer */
+.cert-footer-panel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #F8FAFC;
+  border-top: 1px solid var(--border-light);
+  padding: 20px 24px;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.cert-qr-block {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.cert-qr-img {
+  width: 90px;
+  height: 90px;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  background: #FFFFFF;
+  padding: 4px;
+}
+
+.cert-qr-text {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  max-width: 200px;
+}
+
+/* Not Found State */
+.not-found-card {
+  text-align: center;
+  padding: 48px 24px;
+  background: #FFFFFF;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-light);
+}
+
+.not-found-icon {
+  font-size: 3.5rem;
+  color: var(--gov-red);
+  margin-bottom: 16px;
+}
+
+.not-found-card h2 {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  color: var(--primary-navy-dark);
+  margin-bottom: 10px;
+}
+
+.not-found-card p {
+  color: var(--text-muted);
+  max-width: 500px;
+  margin: 0 auto 24px;
+  font-size: 0.95rem;
+}

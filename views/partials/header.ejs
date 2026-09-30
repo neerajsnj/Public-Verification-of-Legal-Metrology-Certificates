@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="<%= typeof lang !== 'undefined' && lang === 'hi' ? 'hi' : 'en' %>">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+  <title><%= typeof title !== 'undefined' ? title : 'MetroVerify - Legal Metrology Verification System' %></title>
+  
+  <!-- Favicon & Fonts -->
+  <link rel="icon" type="image/svg+xml" href="/images/logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/verify.css">
+</head>
+<body>
+
+  <!-- Tricolor Accent Top Bar -->
+  <div class="gov-top-bar">
+    <div class="stripe-saffron"></div>
+    <div class="stripe-white"></div>
+    <div class="stripe-green"></div>
+  </div>
+
+  <!-- Government of India Official Banner -->
+  <header class="gov-header-banner">
+    <div class="gov-emblem-section">
+      <img src="/images/emblem.svg" alt="National Emblem of India" class="gov-emblem-img">
+      <div class="gov-header-titles">
+        <h2><%= typeof lang !== 'undefined' && lang === 'hi' ? 'भारत सरकार | उपभोक्ता मामले, खाद्य और सार्वजनिक वितरण मंत्रालय' : 'GOVERNMENT OF INDIA | MINISTRY OF CONSUMER AFFAIRS, FOOD & PUBLIC DISTRIBUTION' %></h2>
+        <h3><%= typeof lang !== 'undefined' && lang === 'hi' ? 'विधिक मापविज्ञान प्रभाग (लीगल मेट्रोलॉजी)' : 'DIRECTORATE OF LEGAL METROLOGY (WEIGHTS & MEASURES DIVISION)' %></h3>
+      </div>
+    </div>
+    
+    <div class="gov-banner-right">
+      <div class="sih-badge">
+        <span>★</span> SIH 2026 <span>|</span> PS: SIH26036
+      </div>
+      
+      <div class="lang-toggle" title="Language Switcher">
+        <a href="?lang=en" class="lang-btn <%= typeof lang === 'undefined' || lang !== 'hi' ? 'active' : '' %>">English</a>
+        <a href="?lang=hi" class="lang-btn <%= typeof lang !== 'undefined' && lang === 'hi' ? 'active' : '' %>">हिंदी</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Navigation Bar -->
+  <%- include('./navbar') %>
+
+  <!-- Notifications Drawer (Simulating SMS & Email) -->
+  <%- include('./notification-panel') %>
+
+  <!-- Flash Messages Banner -->
+  <%- include('./flash') %>
+
+  <!-- Main Content Body Wrapper -->
+  <main class="page-content-wrapper">

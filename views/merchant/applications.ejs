@@ -1,0 +1,77 @@
+<%- include('../partials/header') %>
+
+<div class="container">
+  <div class="page-header">
+    <div>
+      <h1>Verification Applications</h1>
+      <p>Track status and review inspector appointments for your submitted metrology applications</p>
+    </div>
+    <div class="page-actions">
+      <a href="/merchant/applications/new" class="btn btn-saffron">+ New Verification Application</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <% if (applications.length === 0) { %>
+      <div style="text-align: center; padding: 48px; color: var(--text-muted);">
+        <p style="font-size: 2.5rem;">📝</p>
+        <h3 style="margin-top: 10px; color: var(--primary-navy);">No verification applications submitted</h3>
+        <p style="font-size: 0.9rem; margin-top: 4px;">Choose from your registered instruments and apply for initial or annual re-verification.</p>
+        <a href="/merchant/applications/new" class="btn btn-saffron" style="margin-top: 16px;">Apply Now</a>
+      </div>
+    <% } else { %>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Application No</th>
+              <th>Verification Type</th>
+              <th>Submitted Date</th>
+              <th>Preferred Date</th>
+              <th>Mode</th>
+              <th>Instruments</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% applications.forEach(app => { %>
+              <tr>
+                <td>
+                  <a href="/merchant/applications/<%= app.id %>" style="font-family: monospace; font-weight: 700; color: var(--primary-navy); text-decoration: none;">
+                    <%= app.application_no %>
+                  </a>
+                </td>
+                <td><%= app.type %></td>
+                <td><%= new Date(app.submitted_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) %></td>
+                <td><%= new Date(app.preferred_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) %></td>
+                <td>
+                  <span class="badge badge-info"><%= app.mode %></span>
+                </td>
+                <td>
+                  <strong><%= app.instrument_count %></strong> unit(s)
+                  <div style="font-size: 0.75rem; color: var(--text-muted);"><%= app.instrument_types %></div>
+                </td>
+                <td>
+                  <% 
+                    let bClass = 'badge-pending';
+                    if (app.status === 'Certificate Issued') bClass = 'badge-valid';
+                    else if (app.status === 'Rejected') bClass = 'badge-rejected';
+                    else if (app.status === 'Scheduled') bClass = 'badge-scheduled';
+                    else if (app.status === 'Under Review') bClass = 'badge-review';
+                  %>
+                  <span class="badge <%= bClass %>"><%= app.status %></span>
+                </td>
+                <td>
+                  <a href="/merchant/applications/<%= app.id %>" class="btn btn-outline btn-sm">Track Status &rarr;</a>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

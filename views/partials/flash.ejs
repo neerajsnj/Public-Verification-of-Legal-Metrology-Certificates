@@ -1,0 +1,31 @@
+<div class="container" style="padding-top: 16px; padding-bottom: 0;">
+  <% if (typeof success !== 'undefined' && success.length > 0) { %>
+    <div class="alert alert-success">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span>✓</span>
+        <span><%= success[0] %></span>
+      </div>
+      <button type="button" class="alert-close">&times;</button>
+    </div>
+  <% } %>
+
+  <% if (typeof error !== 'undefined' && error.length > 0) { %>
+    <div class="alert alert-error">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span>⚠</span>
+        <span><%= error[0] %></span>
+      </div>
+      <button type="button" class="alert-close">&times;</button>
+    </div>
+  <% } %>
+
+  <% if (typeof info !== 'undefined' && info.length > 0) { %>
+    <div class="alert alert-info">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span>ℹ</span>
+        <span><%= info[0] %></span>
+      </div>
+      <button type="button" class="alert-close">&times;</button>
+    </div>
+  <% } %>
+</div>

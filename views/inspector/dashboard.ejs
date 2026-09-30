@@ -1,0 +1,167 @@
+<%- include('../partials/header') %>
+
+<div class="container">
+  <div class="page-header">
+    <div>
+      <h1>Inspector Portal &bull; <%= inspector.district %> Jurisdiction</h1>
+      <p>
+        Officer: <strong><%= currentUser.name %></strong> &bull; Employee ID: <span style="font-family: monospace;"><%= inspector.employee_id %></span> &bull; <%= inspector.designation %>
+      </p>
+    </div>
+    <div class="page-actions">
+      <a href="/inspector/applications" class="btn btn-primary">Open Applications Queue &rarr;</a>
+      <a href="/inspector/analytics" class="btn btn-outline">View Analytics</a>
+    </div>
+  </div>
+
+  <!-- Metric KPI Cards -->
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-icon amber">📥</div>
+      <div class="metric-info">
+        <span class="metric-value"><%= stats.myDistrictPending %></span>
+        <span class="metric-label">My District Queue</span>
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-icon blue">📋</div>
+      <div class="metric-info">
+        <span class="metric-value"><%= stats.totalPending %></span>
+        <span class="metric-label">Total State Pending</span>
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-icon green">✓</div>
+      <div class="metric-info">
+        <span class="metric-value"><%= stats.totalVerified %></span>
+        <span class="metric-label">Verified & Active</span>
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-icon red">⚠️</div>
+      <div class="metric-info">
+        <span class="metric-value"><%= stats.totalRevoked %></span>
+        <span class="metric-label">Revoked Certificates</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="detail-panels-grid">
+    <!-- Left Column: Pending Verification Queue -->
+    <div>
+      <div class="card">
+        <div class="card-header">
+          <h3>Applications Requiring Review</h3>
+          <a href="/inspector/applications?status=Submitted" class="btn btn-outline btn-sm">Filter Submitted &rarr;</a>
+        </div>
+
+        <% if (recentPending.length === 0) { %>
+          <div style="text-align: center; padding: 36px; color: var(--text-muted);">
+            <p style="font-size: 2rem;">🎉</p>
+            <p style="margin-top: 6px;">All applications in your review queue are cleared!</p>
+          </div>
+        <% } else { %>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Application No</th>
+                  <th>Establishment</th>
+                  <th>District</th>
+                  <th>Submitted</th>
+                  <th>Units</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% recentPending.forEach(app => { %>
+                  <tr>
+                    <td>
+                      <a href="/inspector/applications/<%= app.id %>" style="font-family: monospace; font-weight: 700; color: var(--primary-navy); text-decoration: none;">
+                        <%= app.application_no %>
+                      </a>
+                    </td>
+                    <td>
+                      <strong><%= app.business_name %></strong>
+                      <div style="font-size: 0.75rem; color: var(--text-muted); font-family: monospace;">GST: <%= app.gstin %></div>
+                    </td>
+                    <td><%= app.district %></td>
+                    <td><%= new Date(app.submitted_at).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' }) %></td>
+                    <td><%= app.instrument_count %></td>
+                    <td>
+                      <span class="badge <%= app.status === 'Submitted' ? 'badge-submitted' : 'badge-review' %>">
+                        <%= app.status %>
+                      </span>
+                    </td>
+                    <td>
+                      <a href="/inspector/applications/<%= app.id %>" class="btn btn-primary btn-sm">Review &rarr;</a>
+                    </td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Right Column: Scheduled Appointments & Quick Actions -->
+    <div>
+      <div class="card">
+        <div class="card-header">
+          <h3>Today's & Upcoming Inspections</h3>
+        </div>
+
+        <% if (appointments.length === 0) { %>
+          <div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 0.88rem;">
+            📅 No pending appointments scheduled for your roster.
+          </div>
+        <% } else { %>
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <% appointments.forEach(appt => { %>
+              <div style="background: #F8FAFC; border: 1px solid var(--border-light); border-left: 4px solid var(--accent-saffron); border-radius: var(--radius-sm); padding: 12px;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                  <strong style="color: var(--primary-navy); font-size: 0.95rem;">
+                    <%= appt.business_name %>
+                  </strong>
+                  <span class="badge badge-info" style="font-size: 0.7rem;"><%= appt.mode %></span>
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">
+                  Scheduled: <strong><%= new Date(appt.scheduled_at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) %></strong>
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-main); margin-top: 2px;">
+                  Contact: <%= appt.merchant_name %> (&phone; <%= appt.mobile %>)
+                </div>
+                <div style="margin-top: 8px;">
+                  <a href="/inspector/applications/<%= appt.application_id %>" class="btn btn-outline btn-sm" style="font-size: 0.75rem; padding: 2px 8px;">
+                    Open Verification Sheet &rarr;
+                  </a>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        <% } %>
+      </div>
+
+      <!-- Quick Jurisdictional Verification Check -->
+      <div class="card" style="background: #F8FAFC;">
+        <h4 style="font-size: 0.95rem; color: var(--primary-navy); margin-bottom: 8px;">Direct Certificate Lookup</h4>
+        <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">
+          Authenticate or inspect any certificate number in the national registry:
+        </p>
+        <form action="/verify" method="GET" style="display: flex; gap: 8px;">
+          <input type="text" name="certNo" class="form-control" placeholder="LM-2026-..." style="padding: 6px 10px; font-size: 0.85rem;" required>
+          <button type="submit" class="btn btn-primary btn-sm">Lookup</button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<%- include('../partials/footer') %>

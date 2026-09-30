@@ -1,0 +1,71 @@
+<%- include('../partials/header') %>
+
+<div class="container">
+  <div class="page-header">
+    <div>
+      <h1>System Audit Trail & Compliance Log</h1>
+      <p>Immutable forensic record of all administrative, merchant, and inspection activities</p>
+    </div>
+    <div class="page-actions">
+      <a href="/inspector/dashboard" class="btn btn-outline">&larr; Back to Dashboard</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h3>Recent Security & Transaction Logs (Last <%= logs.length %> entries)</h3>
+    </div>
+
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Actor</th>
+            <th>Action Type</th>
+            <th>Target Entity</th>
+            <th>IP Address</th>
+            <th>Audit Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% logs.forEach(log => { %>
+            <tr>
+              <td style="font-size: 0.78rem; color: var(--text-muted); white-space: nowrap;">
+                <%= new Date(log.timestamp).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'medium' }) %>
+              </td>
+              <td>
+                <% if (log.user_name) { %>
+                  <strong><%= log.user_name %></strong>
+                  <span class="badge badge-info" style="font-size: 0.65rem; margin-left: 4px;"><%= log.user_role %></span>
+                <% } else { %>
+                  <span style="color: var(--text-muted);">System / Anonymous</span>
+                <% } %>
+              </td>
+              <td>
+                <% 
+                  let aColor = 'var(--primary-navy)';
+                  if (log.action.includes('APPROVE') || log.action.includes('REGISTER')) aColor = 'var(--gov-green)';
+                  else if (log.action.includes('REJECT') || log.action.includes('REVOKE')) aColor = 'var(--gov-red)';
+                  else if (log.action.includes('SCHEDULE')) aColor = 'var(--gov-amber)';
+                %>
+                <span style="font-family: monospace; font-size: 0.8rem; font-weight: 700; color: <%= aColor %>;">
+                  <%= log.action %>
+                </span>
+              </td>
+              <td>
+                <span style="font-family: monospace; font-size: 0.8rem;"><%= log.entity %> (<%= log.entity_id %>)</span>
+              </td>
+              <td style="font-family: monospace; font-size: 0.78rem; color: var(--text-muted);"><%= log.ip_address || '127.0.0.1' %></td>
+              <td style="font-size: 0.82rem; color: var(--text-main); max-width: 320px;">
+                <%= log.details %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,71 @@
+<%- include('../partials/header') %>
+
+<div class="container" style="max-width: 500px; margin: 40px auto;">
+  <div class="card" style="border-top: 4px solid var(--primary-navy);">
+    
+    <div style="text-align: center; margin-bottom: 24px;">
+      <img src="/images/logo.svg" alt="MetroVerify" style="height: 48px; margin-bottom: 12px;">
+      <h2 style="font-family: var(--font-heading); font-size: 1.5rem; color: var(--primary-navy-dark);">Portal Login</h2>
+      <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 4px;">
+        Sign in to your Legal Metrology verified account
+      </p>
+    </div>
+
+    <!-- 1-Click Demo Credentials Quick Autofill for Hackathon Judges -->
+    <div style="background: #F8FAFC; border: 1px dashed var(--border-medium); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 22px;">
+      <div style="font-size: 0.78rem; font-weight: 700; color: var(--primary-navy); text-transform: uppercase; margin-bottom: 8px;">
+        ⚡ 1-Click Demo Logins (Judges / Reviewers):
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <button type="button" class="btn btn-outline btn-sm demo-autofill-btn" data-email="merchant@demo.com" data-pass="Demo@123" data-role="merchant" style="justify-content: space-between; text-align: left; background: #FFF;">
+          <span>🏪 <strong>Merchant:</strong> merchant@demo.com</span>
+          <span class="badge badge-info" style="font-size: 0.7rem;">Click to Autofill</span>
+        </button>
+        <button type="button" class="btn btn-outline btn-sm demo-autofill-btn" data-email="inspector@demo.com" data-pass="Demo@123" data-role="inspector" style="justify-content: space-between; text-align: left; background: #FFF;">
+          <span>⚖️ <strong>Inspector:</strong> inspector@demo.com</span>
+          <span class="badge badge-info" style="font-size: 0.7rem;">Click to Autofill</span>
+        </button>
+      </div>
+    </div>
+
+    <form id="loginForm" action="/auth/login" method="POST">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <input type="hidden" name="redirect" value="<%= typeof redirect !== 'undefined' ? redirect : '' %>">
+
+      <div class="form-group">
+        <label for="loginRole">Account Role <span class="required">*</span></label>
+        <select id="loginRole" name="role" class="form-control" required>
+          <option value="merchant" <%= typeof presetRole !== 'undefined' && presetRole === 'merchant' ? 'selected' : '' %>>Commercial Merchant / Establishment</option>
+          <option value="inspector" <%= typeof presetRole !== 'undefined' && presetRole === 'inspector' ? 'selected' : '' %>>Legal Metrology Inspecting Officer</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="loginEmail">Registered Email Address <span class="required">*</span></label>
+        <input type="email" id="loginEmail" name="email" class="form-control" placeholder="name@business.gov.in" required autofocus>
+      </div>
+
+      <div class="form-group">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <label for="loginPassword" style="margin-bottom: 0;">Password <span class="required">*</span></label>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">Demo: Demo@123</span>
+        </div>
+        <input type="password" id="loginPassword" name="password" class="form-control" style="margin-top: 6px;" placeholder="••••••••" required>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <button type="submit" class="btn btn-primary btn-block btn-lg" style="font-weight: 700;">
+          Sign In to Portal &rarr;
+        </button>
+      </div>
+
+      <div style="text-align: center; font-size: 0.88rem; color: var(--text-muted); border-top: 1px solid var(--border-light); padding-top: 16px;">
+        New establishment? 
+        <a href="/auth/register" style="color: var(--primary-navy); font-weight: 700; text-decoration: none;">Register as a Merchant</a>
+      </div>
+    </form>
+
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

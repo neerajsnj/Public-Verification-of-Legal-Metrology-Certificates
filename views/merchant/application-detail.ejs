@@ -1,0 +1,255 @@
+<%- include('../partials/header') %>
+
+<div class="container">
+  <div class="page-header">
+    <div>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <h1 style="font-family: monospace;"><%= application.application_no %></h1>
+        <% 
+          let bClass = 'badge-pending';
+          if (application.status === 'Certificate Issued') bClass = 'badge-valid';
+          else if (application.status === 'Rejected') bClass = 'badge-rejected';
+          else if (application.status === 'Scheduled') bClass = 'badge-scheduled';
+          else if (application.status === 'Under Review') bClass = 'badge-review';
+        %>
+        <span class="badge <%= bClass %>" style="font-size: 0.85rem;"><%= application.status %></span>
+      </div>
+      <p>
+        Application Type: <strong><%= application.type %></strong> &bull; Submitted on: <%= new Date(application.submitted_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' }) %>
+      </p>
+    </div>
+    <div class="page-actions">
+      <a href="/merchant/applications" class="btn btn-outline">&larr; Back to Applications</a>
+    </div>
+  </div>
+
+  <!-- Visual Interactive Application Tracker (Timeline Stepper) -->
+  <div class="card">
+    <div class="card-header">
+      <h3>Application Verification Lifecycle Tracker</h3>
+    </div>
+
+    <% 
+      const statuses = ['Submitted', 'Under Review', 'Scheduled', 'Verified', 'Certificate Issued'];
+      const currentStatus = application.status;
+      const isRejected = currentStatus === 'Rejected';
+
+      function getStepState(stepName) {
+        if (isRejected && stepName === 'Verified') return 'rejected';
+        if (currentStatus === 'Certificate Issued') return 'completed';
+        if (currentStatus === stepName) return 'active';
+        
+        const order = { 'Submitted': 1, 'Under Review': 2, 'Scheduled': 3, 'Verified': 4, 'Certificate Issued': 5 };
+        const currentOrder = order[currentStatus] || 1;
+        const stepOrder = order[stepName] || 1;
+        
+        return currentOrder > stepOrder ? 'completed' : '';
+      }
+    %>
+
+    <div class="timeline-stepper">
+      <!-- 1. Submitted -->
+      <div class="timeline-step <%= getStepState('Submitted') %>">
+        <div class="step-node">1</div>
+        <div class="step-label">Submitted</div>
+        <div class="step-date"><%= new Date(application.submitted_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) %></div>
+      </div>
+
+      <!-- 2. Under Review -->
+      <div class="timeline-step <%= getStepState('Under Review') %>">
+        <div class="step-node">2</div>
+        <div class="step-label">Under Review</div>
+        <div class="step-date">Document Audit</div>
+      </div>
+
+      <!-- 3. Scheduled -->
+      <div class="timeline-step <%= getStepState('Scheduled') %>">
+        <div class="step-node">3</div>
+        <div class="step-label">Scheduled</div>
+        <div class="step-date">
+          <%= appointment ? new Date(appointment.scheduled_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : 'Appointment' %>
+        </div>
+      </div>
+
+      <!-- 4. Verified or Rejected -->
+      <div class="timeline-step <%= isRejected ? 'rejected' : getStepState('Verified') %>">
+        <div class="step-node">
+          <%= isRejected ? '✕' : '4' %>
+        </div>
+        <div class="step-label">
+          <%= isRejected ? 'Verification Failed' : 'Test Verified' %>
+        </div>
+        <div class="step-date">Calibration Check</div>
+      </div>
+
+      <!-- 5. Certificate Issued -->
+      <div class="timeline-step <%= isRejected ? '' : getStepState('Certificate Issued') %>">
+        <div class="step-node">5</div>
+        <div class="step-label">Certificate Issued</div>
+        <div class="step-date">QR Authentication</div>
+      </div>
+    </div>
+
+    <!-- Inspector Notes / Rejection Remarks Alert Box -->
+    <% if (application.remarks || isRejected) { %>
+      <div class="alert <%= isRejected ? 'alert-danger' : 'alert-info' %>" style="margin-top: 10px;">
+        <div>
+          <strong><%= isRejected ? 'Rejection Reason / Defect Notice:' : 'Inspector Remarks & Instructions:' %></strong>
+          <p style="margin-top: 4px;"><%= application.remarks %></p>
+        </div>
+      </div>
+    <% } %>
+
+  </div>
+
+  <div class="detail-panels-grid">
+    <!-- Left Column: Instruments & Verification Results -->
+    <div>
+      <div class="card">
+        <div class="card-header">
+          <h3>Instruments in this Application</h3>
+        </div>
+
+        <% items.forEach((item, index) => { %>
+          <div style="border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 18px; margin-bottom: 18px; background: #FFFFFF;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+              <div>
+                <h4 style="color: var(--primary-navy); font-size: 1.05rem;"><%= item.type %></h4>
+                <div style="font-size: 0.82rem; color: var(--text-muted); font-family: monospace;">Serial No: <%= item.serial_no %></div>
+              </div>
+              <div>
+                <% if (item.cert_no) { %>
+                  <span class="badge <%= item.cert_status === 'valid' ? 'badge-valid' : 'badge-revoked' %>">
+                    <%= item.cert_status === 'valid' ? 'Certificate Issued' : item.cert_status.toUpperCase() %>
+                  </span>
+                <% } else if (item.test_result === 'fail') { %>
+                  <span class="badge badge-fail">Failed MPE Test</span>
+                <% } else { %>
+                  <span class="badge badge-pending">Pending Inspection</span>
+                <% } %>
+              </div>
+            </div>
+
+            <div class="info-list" style="margin-bottom: 14px;">
+              <div class="info-row">
+                <span class="info-label">Make & Model:</span>
+                <span class="info-val"><%= item.make_model %></span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Capacity Range:</span>
+                <span class="info-val"><%= item.min_capacity %> to <%= item.max_capacity %> <%= item.capacity_unit %></span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Accuracy Class:</span>
+                <span class="info-val"><%= item.accuracy_class %> (e = <%= item.e_value %> g)</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Location of Use:</span>
+                <span class="info-val"><%= item.location %></span>
+              </div>
+            </div>
+
+            <!-- Calibration Test Result Summary if recorded -->
+            <% if (item.test_result) { %>
+              <div style="background: #F8FAFC; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); padding: 12px; margin-top: 10px;">
+                <div style="font-weight: 700; font-size: 0.85rem; color: var(--primary-navy); margin-bottom: 6px;">
+                  Test Verification Report:
+                </div>
+                <div style="display: flex; gap: 16px; font-size: 0.82rem;">
+                  <div>Max Error: <strong><%= item.max_error %> g</strong></div>
+                  <div>Tolerance Limit: <strong>&plusmn;<%= item.tolerance_limit %> g</strong></div>
+                  <div>Result: <strong style="color: <%= item.test_result === 'pass' ? 'var(--gov-green)' : 'var(--gov-red)' %>;"><%= item.test_result.toUpperCase() %></strong></div>
+                </div>
+              </div>
+            <% } %>
+
+            <!-- Digital Certificate Block if Issued -->
+            <% if (item.cert_no) { %>
+              <div style="background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: var(--radius-sm); padding: 14px; margin-top: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: gap; gap: 12px;">
+                <div>
+                  <div style="font-size: 0.82rem; color: #166534; font-weight: 700;">DIGITAL CERTIFICATE ISSUED:</div>
+                  <div style="font-family: monospace; font-size: 1rem; font-weight: 800; color: #14532D;"><%= item.cert_no %></div>
+                  <div style="font-size: 0.75rem; color: #15803D;">Valid Until: <%= new Date(item.valid_until).toLocaleDateString('en-IN') %></div>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                  <a href="/verify/<%= item.cert_no %>" class="btn btn-outline btn-sm">Public QR View</a>
+                  <% if (item.pdf_path) { %>
+                    <a href="<%= item.pdf_path %>" target="_blank" class="btn btn-success btn-sm" download>📄 Download PDF</a>
+                  <% } %>
+                </div>
+              </div>
+            <% } %>
+
+          </div>
+        <% }) %>
+      </div>
+    </div>
+
+    <!-- Right Column: Appointment & Application Meta -->
+    <div>
+      <!-- Scheduled Appointment Card -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Inspection Appointment</h3>
+        </div>
+
+        <% if (appointment) { %>
+          <div style="background: #F8FAFC; border: 1px solid var(--border-light); border-left: 4px solid var(--primary-navy); border-radius: var(--radius-sm); padding: 14px;">
+            <div style="font-size: 0.78rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Scheduled Inspection Time:</div>
+            <div style="font-size: 1.05rem; font-weight: 700; color: var(--primary-navy); margin-top: 2px;">
+              <%= new Date(appointment.scheduled_at).toLocaleString('en-IN', { dateStyle: 'full', timeStyle: 'short' }) %>
+            </div>
+            
+            <div style="margin-top: 10px; font-size: 0.85rem;">
+              <div>Mode: <strong><%= appointment.mode %></strong></div>
+              <div>Inspecting Officer: <strong><%= appointment.inspector_name %></strong> (<%= appointment.employee_id %>)</div>
+            </div>
+
+            <% if (appointment.notes) { %>
+              <div style="margin-top: 10px; font-size: 0.8rem; color: #334155; background: #FFF; padding: 8px; border-radius: 4px; border: 1px dashed var(--border-medium);">
+                <strong>Officer Instructions:</strong> <%= appointment.notes %>
+              </div>
+            <% } %>
+          </div>
+        <% } else { %>
+          <div style="padding: 16px; text-align: center; color: var(--text-muted); font-size: 0.88rem;">
+            ⏳ Appointment not yet scheduled. The inspecting officer will review your application and assign an inspection slot shortly.
+          </div>
+        <% } %>
+      </div>
+
+      <!-- Application Details Card -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Application Details</h3>
+        </div>
+
+        <div class="info-list">
+          <div class="info-row">
+            <span class="info-label">Application Mode:</span>
+            <span class="info-val"><%= application.mode %></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Preferred Date:</span>
+            <span class="info-val"><%= new Date(application.preferred_date).toLocaleDateString('en-IN') %></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Supporting Document:</span>
+            <span class="info-val">
+              <a href="<%= application.document_path %>" target="_blank" style="color: var(--primary-navy); font-weight: 700;">
+                📎 <%= application.document_name || 'Download File' %>
+              </a>
+            </span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Jurisdiction:</span>
+            <span class="info-val"><%= merchant.district %>, <%= merchant.state %></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,189 @@
+<%- include('../partials/header') %>
+
+<div class="container">
+  
+  <!-- Merchant Welcome Banner -->
+  <div class="page-header">
+    <div>
+      <h1>Merchant Dashboard</h1>
+      <p>
+        <strong><%= merchant.business_name %></strong> &bull; GSTIN: <span style="font-family: monospace;"><%= merchant.gstin %></span> &bull; Jurisdiction: <%= merchant.district %>, <%= merchant.state %>
+      </p>
+    </div>
+    <div class="page-actions">
+      <a href="/merchant/instruments/new" class="btn btn-outline">+ Add Instrument</a>
+      <a href="/merchant/applications/new" class="btn btn-saffron">⚡ Apply for Verification</a>
+    </div>
+  </div>
+
+  <!-- Expiring Certificates Alert Banner (within 30 days) -->
+  <% if (expiringCertificates && expiringCertificates.length > 0) { %>
+    <div class="expiry-banner">
+      <div class="expiry-banner-content">
+        <div class="expiry-icon">⏰</div>
+        <div>
+          <div class="expiry-title">
+            Action Required: <%= expiringCertificates.length %> Verification Certificate(s) Expiring Within 30 Days!
+          </div>
+          <div class="expiry-desc">
+            <% expiringCertificates.forEach(c => { %>
+              <div>&bull; <strong><%= c.cert_no %></strong> for <%= c.instrument_type %> (<%= c.serial_no %>) expires on <strong><%= new Date(c.valid_until).toLocaleDateString('en-IN') %></strong>.</div>
+            <% }) %>
+            Please submit an annual re-verification application to avoid legal metrology non-compliance penalties under Section 44.
+          </div>
+        </div>
+      </div>
+      <div>
+        <a href="/merchant/applications/new" class="btn btn-primary btn-sm">Renew Now &rarr;</a>
+      </div>
+    </div>
+  <% } %>
+
+  <!-- Metrics Grid -->
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-icon blue">⚖️</div>
+      <div class="metric-info">
+        <span class="metric-value"><%= stats.totalInstruments %></span>
+        <span class="metric-label">Registered Instruments</span>
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-icon amber">⏳</div>
+      <div class="metric-info">
+        <span class="metric-value"><%= stats.pendingApplications %></span>
+        <span class="metric-label">Pending Applications</span>
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-icon green">✓</div>
+      <div class="metric-info">
+        <span class="metric-value"><%= stats.approvedApplications %></span>
+        <span class="metric-label">Approved & Issued</span>
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-icon red">✕</div>
+      <div class="metric-info">
+        <span class="metric-value"><%= stats.rejectedApplications %></span>
+        <span class="metric-label">Rejected / Attention</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="detail-panels-grid">
+    <!-- Left Column: Recent Applications -->
+    <div>
+      <div class="card">
+        <div class="card-header">
+          <h3>Recent Verification Applications</h3>
+          <a href="/merchant/applications" class="btn btn-outline btn-sm">View All &rarr;</a>
+        </div>
+
+        <% if (recentApplications.length === 0) { %>
+          <div style="text-align: center; padding: 30px; color: var(--text-muted);">
+            <p style="font-size: 2rem;">📋</p>
+            <p style="margin-top: 6px;">No applications filed yet.</p>
+            <a href="/merchant/applications/new" class="btn btn-saffron btn-sm" style="margin-top: 10px;">Create First Application</a>
+          </div>
+        <% } else { %>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Application No</th>
+                  <th>Type</th>
+                  <th>Submitted</th>
+                  <th>Instruments</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% recentApplications.forEach(app => { %>
+                  <tr>
+                    <td>
+                      <a href="/merchant/applications/<%= app.id %>" style="font-family: monospace; font-weight: 700; color: var(--primary-navy); text-decoration: none;">
+                        <%= app.application_no %>
+                      </a>
+                    </td>
+                    <td><%= app.type %></td>
+                    <td><%= new Date(app.submitted_at).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' }) %></td>
+                    <td><%= app.instrument_count %> unit(s)</td>
+                    <td>
+                      <% 
+                        let bClass = 'badge-pending';
+                        if (app.status === 'Certificate Issued') bClass = 'badge-valid';
+                        else if (app.status === 'Rejected') bClass = 'badge-rejected';
+                        else if (app.status === 'Scheduled') bClass = 'badge-scheduled';
+                        else if (app.status === 'Under Review') bClass = 'badge-review';
+                      %>
+                      <span class="badge <%= bClass %>"><%= app.status %></span>
+                    </td>
+                    <td>
+                      <a href="/merchant/applications/<%= app.id %>" class="btn btn-outline btn-sm">Track &rarr;</a>
+                    </td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Right Column: Upcoming Appointments & Quick Links -->
+    <div>
+      <!-- Upcoming Appointments -->
+      <div class="card" style="margin-bottom: 24px;">
+        <div class="card-header">
+          <h3>Upcoming Appointments</h3>
+        </div>
+
+        <% if (upcomingAppointments.length === 0) { %>
+          <div style="padding: 16px; text-align: center; color: var(--text-muted); font-size: 0.88rem;">
+            📅 No upcoming inspections scheduled at this time.
+          </div>
+        <% } else { %>
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <% upcomingAppointments.forEach(appt => { %>
+              <div style="background: #F8FAFC; border: 1px solid var(--border-light); border-left: 4px solid var(--primary-navy); border-radius: var(--radius-sm); padding: 12px;">
+                <div style="font-weight: 700; color: var(--primary-navy); font-size: 0.9rem;">
+                  <%= new Date(appt.scheduled_at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) %>
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">
+                  Application: <strong><%= appt.application_no %></strong> &bull; Mode: <%= appt.mode %>
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-main); margin-top: 4px;">
+                  Officer: <strong><%= appt.inspector_name %></strong> (<%= appt.employee_id %>)
+                </div>
+                <% if (appt.notes) { %>
+                  <div style="font-size: 0.76rem; color: #475569; background: #FFF; padding: 6px; border-radius: 4px; margin-top: 6px; border: 1px dashed var(--border-light);">
+                    <em>Notes: <%= appt.notes %></em>
+                  </div>
+                <% } %>
+              </div>
+            <% }) %>
+          </div>
+        <% } %>
+      </div>
+
+      <!-- Quick Helpful Guide -->
+      <div class="card" style="background: #F8FAFC;">
+        <h4 style="font-size: 0.95rem; color: var(--primary-navy); margin-bottom: 8px;">Legal Metrology Guidelines</h4>
+        <p style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.5;">
+          Under Rule 27, all commercial weighing instruments must undergo annual re-verification. Keep your calibration test weights and purchase bills accessible for inspecting officers.
+        </p>
+        <div style="margin-top: 14px;">
+          <a href="/merchant/certificates" class="btn btn-outline btn-sm btn-block">Download Issued Certificates</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<%- include('../partials/footer') %>

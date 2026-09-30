@@ -1,0 +1,127 @@
+<%- include('../partials/header') %>
+
+<div class="container">
+  <div class="page-header">
+    <div>
+      <h1>Digital Certificates of Verification</h1>
+      <p>Official Legal Metrology certificates issued under Section 24 of The Legal Metrology Act, 2009</p>
+    </div>
+    <div class="page-actions">
+      <a href="/merchant/applications/new" class="btn btn-saffron">+ Apply for Verification</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <% if (certificates.length === 0) { %>
+      <div style="text-align: center; padding: 48px; color: var(--text-muted);">
+        <p style="font-size: 2.5rem;">📜</p>
+        <h3 style="margin-top: 10px; color: var(--primary-navy);">No certificates issued yet</h3>
+        <p style="font-size: 0.9rem; margin-top: 4px;">Once an inspecting officer approves your verification tests, digitally signed certificates with QR authenticity will appear here.</p>
+        <a href="/merchant/applications/new" class="btn btn-saffron" style="margin-top: 16px;">Submit Application</a>
+      </div>
+    <% } else { %>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Certificate No</th>
+              <th>Instrument Details</th>
+              <th>Issue Date</th>
+              <th>Valid Until</th>
+              <th>Status</th>
+              <th>QR Code</th>
+              <th>Official PDF</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% certificates.forEach(cert => { %>
+              <% 
+                const now = new Date();
+                const validUntil = new Date(cert.valid_until);
+                let effStatus = cert.status;
+                if (cert.status === 'valid' && validUntil < now) effStatus = 'expired';
+              %>
+              <tr>
+                <td>
+                  <a href="/verify/<%= cert.cert_no %>" style="font-family: monospace; font-weight: 700; color: var(--primary-navy); text-decoration: none;">
+                    <%= cert.cert_no %>
+                  </a>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);">App: <%= cert.application_no %></div>
+                </td>
+                <td>
+                  <strong><%= cert.instrument_type %></strong>
+                  <div style="font-size: 0.8rem; color: var(--text-muted);">SN: <span style="font-family: monospace;"><%= cert.serial_no %></span> (<%= cert.make_model %>)</div>
+                </td>
+                <td><%= new Date(cert.issued_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) %></td>
+                <td>
+                  <span style="font-weight: 600; color: <%= effStatus === 'expired' ? 'var(--gov-red)' : 'var(--gov-green)' %>;">
+                    <%= new Date(cert.valid_until).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) %>
+                  </span>
+                </td>
+                <td>
+                  <% if (effStatus === 'valid') { %>
+                    <span class="badge badge-valid">Valid</span>
+                  <% } else if (effStatus === 'expired') { %>
+                    <span class="badge badge-expired">Expired</span>
+                  <% } else { %>
+                    <span class="badge badge-revoked">Revoked</span>
+                  <% } %>
+                </td>
+                <td>
+                  <button type="button" class="btn btn-outline btn-sm" onclick="openModal('qrModal_<%= cert.id %>')">
+                    📱 View QR
+                  </button>
+
+                  <!-- QR Code Modal -->
+                  <div id="qrModal_<%= cert.id %>" class="modal-overlay">
+                    <div class="modal-card" style="max-width: 420px; text-align: center;">
+                      <div class="modal-header">
+                        <h3>Certificate QR Authenticity</h3>
+                        <button type="button" class="modal-close-btn" onclick="closeModal('qrModal_<%= cert.id %>')">&times;</button>
+                      </div>
+                      <div class="modal-body">
+                        <img src="<%= cert.qrDataUrl %>" alt="QR Code" style="width: 200px; height: 200px; margin: 0 auto; display: block; border: 1px solid var(--border-medium); padding: 8px; border-radius: var(--radius-sm);">
+                        <div style="font-family: monospace; font-size: 1.1rem; font-weight: 700; color: var(--primary-navy); margin-top: 14px;">
+                          <%= cert.cert_no %>
+                        </div>
+                        <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 6px;">
+                          Scan with any smartphone or barcode reader to open public verification record.
+                        </p>
+                        <div style="margin-top: 14px;">
+                          <a href="/verify/<%= cert.cert_no %>" class="btn btn-primary btn-sm btn-block" target="_blank">
+                            Open Public Verification Page &rarr;
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                </td>
+                <td>
+                  <% if (cert.pdf_path) { %>
+                    <a href="<%= cert.pdf_path %>" target="_blank" class="btn btn-primary btn-sm" download>
+                      📄 Download PDF
+                    </a>
+                  <% } else { %>
+                    <span style="color: var(--text-muted); font-size: 0.8rem;">Processing</span>
+                  <% } %>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- Statutory Display Advice -->
+  <div style="background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: var(--radius-md); padding: 16px; margin-top: 20px; display: flex; gap: 14px; align-items: center;">
+    <div style="font-size: 1.8rem;">ℹ️</div>
+    <div style="font-size: 0.85rem; color: #1E40AF; line-height: 1.5;">
+      <strong>Mandatory Display Requirement:</strong> Under Rule 27 of the Legal Metrology (General) Rules, 2011, the certificate of verification or its authorized QR replica must be displayed prominently at the place of use of the weighing/measuring instrument for public and enforcement inspection.
+    </div>
+  </div>
+
+</div>
+
+<%- include('../partials/footer') %>

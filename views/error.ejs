@@ -1,0 +1,24 @@
+<%- include('./partials/header') %>
+
+<div class="container" style="max-width: 600px; margin: 60px auto; text-align: center;">
+  <div class="card" style="padding: 48px 24px; border-top: 4px solid var(--gov-red);">
+    <div style="font-size: 3.5rem; color: var(--gov-red); margin-bottom: 16px;">
+      <%= typeof status !== 'undefined' && status === 404 ? '🔍' : '⚠️' %>
+    </div>
+    
+    <h1 style="font-family: var(--font-heading); font-size: 2rem; color: var(--primary-navy-dark); margin-bottom: 10px;">
+      <%= typeof status !== 'undefined' && status === 404 ? '404 - Page Not Found' : '500 - Portal Error' %>
+    </h1>
+
+    <p style="color: var(--text-muted); font-size: 1rem; line-height: 1.6; margin-bottom: 24px;">
+      <%= typeof message !== 'undefined' ? message : 'An unexpected error occurred while processing your request on the MetroVerify portal.' %>
+    </p>
+
+    <div style="display: flex; gap: 12px; justify-content: center;">
+      <a href="/" class="btn btn-primary">Return to Portal Home</a>
+      <a href="/verify" class="btn btn-outline">Verify a Certificate</a>
+    </div>
+  </div>
+</div>
+
+<%- include('./partials/footer') %>

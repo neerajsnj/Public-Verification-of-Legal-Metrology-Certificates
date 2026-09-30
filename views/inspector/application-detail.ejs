@@ -1,0 +1,438 @@
+<%- include('../partials/header') %>
+
+<div class="container">
+  <div class="page-header">
+    <div>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <h1 style="font-family: monospace;"><%= application.application_no %></h1>
+        <% 
+          let bClass = 'badge-pending';
+          if (application.status === 'Certificate Issued') bClass = 'badge-valid';
+          else if (application.status === 'Rejected') bClass = 'badge-rejected';
+          else if (application.status === 'Scheduled') bClass = 'badge-scheduled';
+          else if (application.status === 'Under Review') bClass = 'badge-review';
+        %>
+        <span class="badge <%= bClass %>" style="font-size: 0.85rem;"><%= application.status %></span>
+      </div>
+      <p>
+        Submitted by <strong><%= application.business_name %></strong> on <%= new Date(application.submitted_at).toLocaleDateString('en-IN', { dateStyle: 'long' }) %>
+      </p>
+    </div>
+
+    <!-- Inspector Action Buttons -->
+    <div class="page-actions">
+      <button type="button" class="btn btn-outline" onclick="openModal('requestInfoModal')">
+        💬 Request Info
+      </button>
+      <button type="button" class="btn btn-outline" onclick="openModal('scheduleModal')">
+        📅 Schedule Visit
+      </button>
+      <a href="#verificationSection" class="btn btn-primary">
+        ⚖️ Record Test & Decide &darr;
+      </a>
+    </div>
+  </div>
+
+  <!-- Status Alert if Remarks / Rejection -->
+  <% if (application.remarks) { %>
+    <div class="alert <%= application.status === 'Rejected' ? 'alert-danger' : 'alert-info' %>">
+      <div>
+        <strong><%= application.status === 'Rejected' ? 'Rejection Reason Notice:' : 'Inspector Notes / Clarification Request:' %></strong>
+        <p style="margin-top: 4px;"><%= application.remarks %></p>
+      </div>
+    </div>
+  <% } %>
+
+  <div class="detail-panels-grid">
+    <!-- Left Column: Merchant Details & Document Preview -->
+    <div>
+      
+      <!-- Merchant Profile Card -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Establishment Particulars</h3>
+        </div>
+        <div class="info-list">
+          <div class="info-row">
+            <span class="info-label">Business Name:</span>
+            <span class="info-val"><%= application.business_name %></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">GSTIN:</span>
+            <span class="info-val" style="font-family: monospace;"><%= application.gstin %></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Authorized Signatory:</span>
+            <span class="info-val"><%= application.merchant_name %></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Contact Phone & Email:</span>
+            <span class="info-val">&phone; <%= application.mobile %> &bull; <%= application.merchant_email %></span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Physical Premises:</span>
+            <span class="info-val"><%= application.address %>, <%= application.district %>, <%= application.state %> - <%= application.pincode %></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Supporting Document Card -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Uploaded Verification Document</h3>
+        </div>
+        <div style="background: #F8FAFC; border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 16px; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-weight: 700; color: var(--primary-navy); font-size: 0.92rem;">
+              📎 <%= application.document_name || 'Proof of Purchase / Invoice' %>
+            </div>
+            <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px;">
+              Document submitted by merchant for technical validation
+            </div>
+          </div>
+          <a href="<%= application.document_path %>" target="_blank" class="btn btn-outline btn-sm">
+            View / Download File &rarr;
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right Column: Appointment Schedule & Audit History -->
+    <div>
+      <!-- Appointment Schedule Status -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Inspection Appointment</h3>
+          <button type="button" class="btn btn-outline btn-sm" onclick="openModal('scheduleModal')">
+            <%= appointment ? 'Reschedule' : 'Set Date' %>
+          </button>
+        </div>
+
+        <% if (appointment) { %>
+          <div style="background: #F8FAFC; border: 1px solid var(--border-light); border-left: 4px solid var(--primary-navy); border-radius: var(--radius-sm); padding: 14px;">
+            <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Scheduled On:</div>
+            <div style="font-size: 1.05rem; font-weight: 700; color: var(--primary-navy); margin-top: 2px;">
+              <%= new Date(appointment.scheduled_at).toLocaleString('en-IN', { dateStyle: 'full', timeStyle: 'short' }) %>
+            </div>
+            <div style="margin-top: 8px; font-size: 0.82rem;">
+              <div>Mode: <strong><%= appointment.mode %></strong></div>
+              <div>Assigned Inspector: <strong><%= appointment.inspector_name %></strong> (<%= appointment.employee_id %>)</div>
+            </div>
+            <% if (appointment.notes) { %>
+              <div style="font-size: 0.78rem; color: #475569; background: #FFF; padding: 6px; border-radius: 4px; margin-top: 8px; border: 1px dashed var(--border-light);">
+                <em>Instructions: <%= appointment.notes %></em>
+              </div>
+            <% } %>
+          </div>
+        <% } else { %>
+          <div style="text-align: center; padding: 20px; color: var(--text-muted); font-size: 0.88rem;">
+            No appointment scheduled yet. Preferred date: <strong><%= new Date(application.preferred_date).toLocaleDateString('en-IN') %></strong>
+          </div>
+        <% } %>
+      </div>
+
+      <!-- Application Audit Trail -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Application Audit Log</h3>
+        </div>
+        <% if (auditTrail.length === 0) { %>
+          <div style="color: var(--text-muted); font-size: 0.82rem; text-align: center; padding: 12px;">No logged events yet.</div>
+        <% } else { %>
+          <div style="display: flex; flex-direction: column; gap: 8px; max-height: 220px; overflow-y: auto;">
+            <% auditTrail.forEach(log => { %>
+              <div style="font-size: 0.78rem; border-bottom: 1px solid var(--border-light); padding-bottom: 6px;">
+                <div style="display: flex; justify-content: space-between; font-weight: 600;">
+                  <span style="color: var(--primary-navy);"><%= log.action %></span>
+                  <span style="color: var(--text-light);"><%= new Date(log.timestamp).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) %></span>
+                </div>
+                <div style="color: var(--text-muted); margin-top: 2px;"><%= log.details %></div>
+              </div>
+            <% }) %>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detailed Instruments List & Verification Test Reading Section -->
+  <div id="verificationSection" class="card" style="margin-top: 10px;">
+    <div class="card-header">
+      <h2>Instruments & Calibration Verification Testing</h2>
+    </div>
+
+    <% items.forEach((item, index) => { %>
+      <div style="border: 2px solid var(--border-medium); border-radius: var(--radius-md); padding: 20px; margin-bottom: 24px; background: #FFFFFF;">
+        
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px;">
+          <div>
+            <h3 style="color: var(--primary-navy); font-size: 1.15rem;"><%= item.type %> &bull; Model: <%= item.make_model %></h3>
+            <div style="font-family: monospace; font-size: 0.88rem; color: var(--text-muted); font-weight: 700;">
+              SERIAL NUMBER: <%= item.serial_no %>
+            </div>
+          </div>
+
+          <div>
+            <% if (item.cert_no) { %>
+              <span class="badge <%= item.cert_status === 'valid' ? 'badge-valid' : 'badge-revoked' %>" style="font-size: 0.82rem; padding: 6px 12px;">
+                <%= item.cert_status === 'valid' ? '✓ CERTIFICATE ISSUED: ' + item.cert_no : 'REVOKED: ' + item.cert_no %>
+              </span>
+            <% } else if (item.test_result === 'fail') { %>
+              <span class="badge badge-fail" style="font-size: 0.82rem; padding: 6px 12px;">TEST FAILED (REJECTED)</span>
+            <% } else { %>
+              <span class="badge badge-pending" style="font-size: 0.82rem; padding: 6px 12px;">Awaiting Verification</span>
+            <% } %>
+          </div>
+        </div>
+
+        <!-- Metrological Specs Grid -->
+        <div class="cert-grid" style="margin-bottom: 18px;">
+          <div class="cert-field-item">
+            <div class="cert-field-label">Accuracy Class</div>
+            <div class="cert-field-value"><%= item.accuracy_class %></div>
+          </div>
+          <div class="cert-field-item">
+            <div class="cert-field-label">Capacity Range</div>
+            <div class="cert-field-value"><%= item.min_capacity %> - <%= item.max_capacity %> <%= item.capacity_unit %></div>
+          </div>
+          <div class="cert-field-item">
+            <div class="cert-field-label">Verification Scale Interval (e)</div>
+            <div class="cert-field-value"><%= item.e_value %> g</div>
+          </div>
+          <div class="cert-field-item">
+            <div class="cert-field-label">Installation Location</div>
+            <div class="cert-field-value"><%= item.location %></div>
+          </div>
+        </div>
+
+        <!-- Verification Test Form if not yet certified / or to re-test -->
+        <div style="background: #F8FAFC; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); padding: 18px;">
+          <h4 style="color: var(--primary-navy); font-size: 0.95rem; margin-bottom: 8px;">
+            Record Metrological Test Readings & Issue Decision
+          </h4>
+          <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 14px;">
+            Test the instrument with calibrated reference standards traceable to National Prototype Standards. Enter nominal test loads and observed scale readings. The system compares the error delta against Maximum Permissible Error (MPE) tolerances under Legal Metrology Rules, 2011.
+          </p>
+
+          <form action="/inspector/applications/<%= application.id %>/verify-result" method="POST">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <input type="hidden" name="itemId" value="<%= item.item_id %>">
+            <input type="hidden" id="max_error" name="max_error" value="0.000">
+            <input type="hidden" id="readings_json" name="readings_json" value="">
+
+            <!-- Configurable Tolerance Limit Input -->
+            <div class="form-row" style="margin-bottom: 14px;">
+              <div class="form-group" style="max-width: 280px; margin-bottom: 0;">
+                <label for="tolerance_limit">MPE Tolerance Limit (&plusmn; g) <span class="required">*</span></label>
+                <input type="number" step="any" id="tolerance_limit" name="tolerance_limit" value="<%= item.e_value || 1.0 %>" class="form-control" required>
+                <div class="form-hint">Default based on accuracy class scale interval 'e'</div>
+              </div>
+
+              <div class="form-group" style="max-width: 240px; margin-bottom: 0;">
+                <label for="validity_months">Certificate Validity</label>
+                <select id="validity_months" name="validity_months" class="form-control">
+                  <option value="12" selected>12 Months (Standard Periodic)</option>
+                  <option value="24">24 Months (Class I & Class II Precision)</option>
+                  <option value="6">6 Months (Provisional)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Dynamic Test Readings Calculator Table -->
+            <div class="table-responsive">
+              <table class="test-calculator-table">
+                <thead>
+                  <tr>
+                    <th style="width: 80px;">Point</th>
+                    <th>Nominal Reference Load (<%= item.capacity_unit %>)</th>
+                    <th>Observed Scale Reading (<%= item.capacity_unit %>)</th>
+                    <th>Observed Error</th>
+                    <th>MPE Status</th>
+                    <th style="width: 60px;">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="testReadingsBody">
+                  <!-- Row 1: Min / Low Load -->
+                  <tr>
+                    <td>#1 (Min)</td>
+                    <td>
+                      <input type="number" step="any" class="nominal-input form-control" value="<%= (item.min_capacity || 0.1).toFixed(2) %>" required>
+                    </td>
+                    <td>
+                      <input type="number" step="any" class="observed-input form-control" value="<%= (item.min_capacity || 0.1).toFixed(2) %>" required>
+                    </td>
+                    <td class="error-display font-mono" style="font-weight: 700;">+0.000</td>
+                    <td><span class="status-badge badge badge-pass">PASS</span></td>
+                    <td style="text-align: center;">
+                      <button type="button" class="btn btn-outline btn-sm delete-row-btn" style="color: var(--gov-red); padding: 2px 6px;">✕</button>
+                    </td>
+                  </tr>
+                  <!-- Row 2: Half Capacity -->
+                  <tr>
+                    <td>#2 (50%)</td>
+                    <td>
+                      <input type="number" step="any" class="nominal-input form-control" value="<%= (item.max_capacity / 2).toFixed(2) %>" required>
+                    </td>
+                    <td>
+                      <input type="number" step="any" class="observed-input form-control" value="<%= (item.max_capacity / 2).toFixed(2) %>" required>
+                    </td>
+                    <td class="error-display font-mono" style="font-weight: 700;">+0.000</td>
+                    <td><span class="status-badge badge badge-pass">PASS</span></td>
+                    <td style="text-align: center;">
+                      <button type="button" class="btn btn-outline btn-sm delete-row-btn" style="color: var(--gov-red); padding: 2px 6px;">✕</button>
+                    </td>
+                  </tr>
+                  <!-- Row 3: Max Capacity -->
+                  <tr>
+                    <td>#3 (Max)</td>
+                    <td>
+                      <input type="number" step="any" class="nominal-input form-control" value="<%= item.max_capacity.toFixed(2) %>" required>
+                    </td>
+                    <td>
+                      <input type="number" step="any" class="observed-input form-control" value="<%= item.max_capacity.toFixed(2) %>" required>
+                    </td>
+                    <td class="error-display font-mono" style="font-weight: 700;">+0.000</td>
+                    <td><span class="status-badge badge badge-pass">PASS</span></td>
+                    <td style="text-align: center;">
+                      <button type="button" class="btn btn-outline btn-sm delete-row-btn" style="color: var(--gov-red); padding: 2px 6px;">✕</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div style="margin: 10px 0 16px;">
+              <button type="button" id="addReadingRowBtn" class="btn btn-outline btn-sm">
+                + Add Test Point Row
+              </button>
+            </div>
+
+            <!-- Auto-flag Alert if error exceeds tolerance -->
+            <div id="toleranceExceededAlert" class="alert alert-danger" style="display: none; margin-bottom: 16px;"></div>
+
+            <!-- Inspector Notes & Decision -->
+            <div class="form-group">
+              <label for="inspector_remarks">Metrological Observations / Officer Remarks</label>
+              <textarea id="inspector_remarks" name="inspector_remarks" rows="2" class="form-control" placeholder="Verification conducted in accordance with OIML R76 / Legal Metrology Rules..."></textarea>
+            </div>
+
+            <!-- Final Decision Selector -->
+            <div style="background: #FFF; border: 1px solid var(--border-medium); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 18px;">
+              <label style="font-size: 0.9rem; font-weight: 700; margin-bottom: 10px;">Metrological Verification Decision: <span class="required">*</span></label>
+              
+              <div style="display: flex; gap: 24px; align-items: center;">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                  <input type="radio" name="decision" value="pass" checked style="width: 18px; height: 18px; accent-color: var(--gov-green);">
+                  <strong style="color: var(--gov-green);">Approve & Generate Digital Certificate</strong>
+                </label>
+
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                  <input type="radio" name="decision" value="fail" style="width: 18px; height: 18px; accent-color: var(--gov-red);">
+                  <strong style="color: var(--gov-red);">Reject Verification (MPE Exceeded / Defective)</strong>
+                </label>
+              </div>
+
+              <!-- Rejection Reason Textarea (Shown when Reject is selected) -->
+              <div id="rejectionReasonBox" style="display: none; margin-top: 14px;">
+                <label for="rejection_reason">Mandatory Legal Rejection Reason <span class="required">*</span></label>
+                <textarea id="rejection_reason" name="rejection_reason" rows="2" class="form-control" placeholder="Specify statutory defect or excessive error delta..."></textarea>
+              </div>
+            </div>
+
+            <div>
+              <button type="submit" class="btn btn-primary btn-lg" style="font-weight: 700;">
+                Submit Verification Record & Complete &rarr;
+              </button>
+            </div>
+
+          </form>
+        </div>
+
+        <!-- Download & Certificate details if issued -->
+        <% if (item.cert_no) { %>
+          <div style="background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: var(--radius-sm); padding: 14px; margin-top: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <div style="font-weight: 700; color: #166534;">Official Digital Certificate Active:</div>
+              <div style="font-family: monospace; font-size: 1.05rem; font-weight: 800; color: #14532D;"><%= item.cert_no %></div>
+              <div style="font-size: 0.78rem; color: #15803D;">Expiry Date: <%= new Date(item.valid_until).toLocaleDateString('en-IN') %></div>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <a href="/verify/<%= item.cert_no %>" class="btn btn-outline btn-sm" target="_blank">🔍 Open QR Verification</a>
+              <% if (item.pdf_path) { %>
+                <a href="<%= item.pdf_path %>" target="_blank" class="btn btn-success btn-sm" download>📄 Download PDF Certificate</a>
+              <% } %>
+            </div>
+          </div>
+        <% } %>
+
+      </div>
+    <% }) %>
+  </div>
+
+</div>
+
+<!-- Modal 1: Request More Information -->
+<div id="requestInfoModal" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>Request Clarification / More Information</h3>
+      <button type="button" class="modal-close-btn" onclick="closeModal('requestInfoModal')">&times;</button>
+    </div>
+    <form action="/inspector/applications/<%= application.id %>/request-info" method="POST">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <div class="modal-body">
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">
+          This will update the application status to <strong>"Under Review"</strong> and notify the merchant via SMS & Email.
+        </p>
+        <div class="form-group">
+          <label for="remarks">Clarification Questions / Required Documents <span class="required">*</span></label>
+          <textarea id="remarks" name="remarks" rows="4" class="form-control" placeholder="e.g. Please upload clear photo of manufacturer plate or updated tax invoice..." required></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('requestInfoModal')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Send Request to Merchant</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal 2: Schedule Appointment -->
+<div id="scheduleModal" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>Schedule Verification Appointment</h3>
+      <button type="button" class="modal-close-btn" onclick="closeModal('scheduleModal')">&times;</button>
+    </div>
+    <form action="/inspector/applications/<%= application.id %>/schedule" method="POST">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="scheduled_at">Inspection Date & Time <span class="required">*</span></label>
+          <input type="datetime-local" id="scheduled_at" name="scheduled_at" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label for="schedule_mode">Verification Mode <span class="required">*</span></label>
+          <select id="schedule_mode" name="mode" class="form-control" required>
+            <option value="In-person (Lab Visit)">In-person (Merchant to bring instrument to Metrology Lab)</option>
+            <option value="On-site Premises Visit" selected>On-site Visit (Inspector to visit Merchant Premises)</option>
+            <option value="Remote Verification">Remote Electronic Verification</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="schedule_notes">Instructions for Merchant</label>
+          <textarea id="schedule_notes" name="notes" rows="3" class="form-control" placeholder="e.g. Keep 500kg test weights ready at the receiving bay..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('scheduleModal')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Confirm & Notify Merchant</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="/js/test-calculator.js"></script>
+
+<%- include('../partials/footer') %>

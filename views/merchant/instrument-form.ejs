@@ -1,0 +1,128 @@
+<%- include('../partials/header') %>
+
+<div class="container" style="max-width: 760px;">
+  <div class="page-header">
+    <div>
+      <h1><%= instrument ? 'Edit Instrument Details' : 'Register New Instrument' %></h1>
+      <p>Specify metrological parameters under the Legal Metrology (General) Rules, 2011</p>
+    </div>
+    <div class="page-actions">
+      <a href="/merchant/instruments" class="btn btn-outline">&larr; Back to Instruments</a>
+    </div>
+  </div>
+
+  <div class="card" style="border-top: 4px solid var(--primary-navy);">
+    <form id="instrumentForm" action="<%= instrument ? '/merchant/instruments/' + instrument.id + '/edit' : '/merchant/instruments/new' %>" method="POST" novalidate>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="type">Instrument Type / Category <span class="required">*</span></label>
+          <select id="type" name="type" class="form-control" required>
+            <option value="">-- Select Instrument Type --</option>
+            <% 
+              const types = [
+                'Electronic Weighing Scale',
+                'Platform Scale',
+                'Weighbridge',
+                'Counter Scale',
+                'Spring Balance',
+                'Measuring Tape',
+                'Fuel Dispenser',
+                'Liquid Measure',
+                'Weights'
+              ];
+            %>
+            <% types.forEach(t => { %>
+              <option value="<%= t %>" <%= instrument && instrument.type === t ? 'selected' : '' %>><%= t %></option>
+            <% }) %>
+          </select>
+          <div class="invalid-feedback"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="make_model">Manufacturer Make & Model <span class="required">*</span></label>
+          <input type="text" id="make_model" name="make_model" class="form-control" placeholder="e.g. Essae Teraoka DS-215" value="<%= instrument ? instrument.make_model : '' %>" required>
+          <div class="invalid-feedback"></div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="serial_no">Serial Number (Unique) <span class="required">*</span></label>
+          <input type="text" id="serial_no" name="serial_no" class="form-control" placeholder="e.g. ESS-2023-8841" style="font-family: monospace;" value="<%= instrument ? instrument.serial_no : '' %>" required>
+          <div class="form-hint">Physical serial stamped on the instrument manufacturer plate</div>
+          <div class="invalid-feedback"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="accuracy_class">Accuracy Class <span class="required">*</span></label>
+          <select id="accuracy_class" name="accuracy_class" class="form-control" required>
+            <option value="Class III" <%= instrument && instrument.accuracy_class === 'Class III' ? 'selected' : '' %>>Class III (Medium Accuracy - Commercial Retail & Industrial)</option>
+            <option value="Class II" <%= instrument && instrument.accuracy_class === 'Class II' ? 'selected' : '' %>>Class II (High Accuracy - Jewelers & Bullion)</option>
+            <option value="Class I" <%= instrument && instrument.accuracy_class === 'Class I' ? 'selected' : '' %>>Class I (Special Accuracy - Precision Laboratory)</option>
+            <option value="Class IIII" <%= instrument && instrument.accuracy_class === 'Class IIII' ? 'selected' : '' %>>Class IIII (Ordinary Accuracy - Heavy Scrap / Coarse)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row" style="grid-template-columns: 2fr 2fr 1.5fr;">
+        <div class="form-group">
+          <label for="max_capacity">Maximum Capacity (Max) <span class="required">*</span></label>
+          <input type="number" step="any" id="max_capacity" name="max_capacity" class="form-control" placeholder="e.g. 30" value="<%= instrument ? instrument.max_capacity : '' %>" required>
+          <div class="invalid-feedback"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="min_capacity">Minimum Capacity (Min) <span class="required">*</span></label>
+          <input type="number" step="any" id="min_capacity" name="min_capacity" class="form-control" placeholder="e.g. 0.1" value="<%= instrument ? instrument.min_capacity : '' %>" required>
+          <div class="invalid-feedback"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="capacity_unit">Unit of Measure <span class="required">*</span></label>
+          <select id="capacity_unit" name="capacity_unit" class="form-control" required>
+            <option value="kg" <%= instrument && instrument.capacity_unit === 'kg' ? 'selected' : '' %>>kg (Kilogram)</option>
+            <option value="g" <%= instrument && instrument.capacity_unit === 'g' ? 'selected' : '' %>>g (Gram)</option>
+            <option value="ton" <%= instrument && instrument.capacity_unit === 'ton' ? 'selected' : '' %>>ton (Metric Ton)</option>
+            <option value="L" <%= instrument && instrument.capacity_unit === 'L' ? 'selected' : '' %>>L (Liter)</option>
+            <option value="ml" <%= instrument && instrument.capacity_unit === 'ml' ? 'selected' : '' %>>ml (Milliliter)</option>
+            <option value="m" <%= instrument && instrument.capacity_unit === 'm' ? 'selected' : '' %>>m (Meter)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="e_value">Verification Scale Interval (e) in grams <span class="required">*</span></label>
+          <input type="number" step="any" id="e_value" name="e_value" class="form-control" placeholder="e.g. 5.0" value="<%= instrument ? instrument.e_value : '' %>" required>
+          <div class="form-hint">Crucial for Maximum Permissible Error (MPE) tolerance checking</div>
+          <div class="invalid-feedback"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="year_of_manufacture">Year of Manufacture <span class="required">*</span></label>
+          <input type="number" id="year_of_manufacture" name="year_of_manufacture" class="form-control" placeholder="e.g. 2023" min="1970" max="2026" value="<%= instrument ? instrument.year_of_manufacture : '2024' %>" required>
+          <div class="invalid-feedback"></div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="location">Location of Use at Establishment <span class="required">*</span></label>
+        <input type="text" id="location" name="location" class="form-control" placeholder="e.g. Main Billing Counter 1 / Warehousing Dispatch Bay" value="<%= instrument ? instrument.location : '' %>" required>
+        <div class="form-hint">Physical room or counter where instrument is stationed for inspection</div>
+        <div class="invalid-feedback"></div>
+      </div>
+
+      <div style="margin-top: 24px; display: flex; gap: 12px;">
+        <button type="submit" class="btn btn-primary btn-lg">
+          <%= instrument ? 'Save Changes' : 'Register Instrument' %> &rarr;
+        </button>
+        <a href="/merchant/instruments" class="btn btn-outline btn-lg">Cancel</a>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

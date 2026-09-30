@@ -1,0 +1,132 @@
+<%- include('../partials/header') %>
+
+<div class="container">
+  <div class="page-header">
+    <div>
+      <h1>Issued Legal Metrology Certificates</h1>
+      <p>Registry of active, expired, and revoked digital certificates under Section 24 of The Legal Metrology Act, 2009</p>
+    </div>
+    <div class="page-actions">
+      <a href="/inspector/applications" class="btn btn-primary">Process Pending Applications</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>Certificate No</th>
+            <th>Establishment / Merchant</th>
+            <th>Instrument Particulars</th>
+            <th>Issue Date</th>
+            <th>Valid Until</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% certificates.forEach(cert => { %>
+            <% 
+              const now = new Date();
+              const validUntil = new Date(cert.valid_until);
+              let effStatus = cert.status;
+              if (cert.status === 'valid' && validUntil < now) effStatus = 'expired';
+            %>
+            <tr>
+              <td>
+                <a href="/verify/<%= cert.cert_no %>" style="font-family: monospace; font-weight: 700; color: var(--primary-navy); text-decoration: none;">
+                  <%= cert.cert_no %>
+                </a>
+              </td>
+              <td>
+                <strong><%= cert.business_name %></strong>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">
+                  <%= cert.district %> &bull; <span style="font-family: monospace;"><%= cert.gstin %></span>
+                </div>
+              </td>
+              <td>
+                <div><%= cert.instrument_type %></div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); font-family: monospace;">
+                  SN: <%= cert.serial_no %> (<%= cert.make_model %>)
+                </div>
+              </td>
+              <td><%= new Date(cert.issued_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) %></td>
+              <td>
+                <span style="font-weight: 600; color: <%= effStatus === 'expired' ? 'var(--gov-red)' : 'var(--gov-green)' %>;">
+                  <%= new Date(cert.valid_until).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) %>
+                </span>
+              </td>
+              <td>
+                <% if (effStatus === 'valid') { %>
+                  <span class="badge badge-valid">Valid</span>
+                <% } else if (effStatus === 'expired') { %>
+                  <span class="badge badge-expired">Expired</span>
+                <% } else { %>
+                  <span class="badge badge-revoked">Revoked</span>
+                <% } %>
+              </td>
+              <td>
+                <div style="display: flex; gap: 6px;">
+                  <a href="/verify/<%= cert.cert_no %>" class="btn btn-outline btn-sm" target="_blank" title="Public check">Verify</a>
+                  <% if (cert.pdf_path) { %>
+                    <a href="<%= cert.pdf_path %>" target="_blank" class="btn btn-outline btn-sm" download title="Download official PDF">PDF</a>
+                  <% } %>
+                  <% if (cert.status === 'valid') { %>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="openRevokeModal('<%= cert.cert_no %>')" title="Revoke certificate for non-compliance">
+                      Revoke
+                    </button>
+                  <% } %>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Revoke Certificate Modal -->
+<div id="revokeModal" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-header" style="background: #FEF2F2;">
+      <h3 style="color: var(--gov-red);">Revoke Certificate of Verification</h3>
+      <button type="button" class="modal-close-btn" onclick="closeModal('revokeModal')">&times;</button>
+    </div>
+    <form action="/inspector/certificates/revoke" method="POST">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <input type="hidden" id="revokeCertNo" name="cert_no" value="">
+
+      <div class="modal-body">
+        <div style="background: #FFF1F2; border: 1px solid #FECDD3; border-radius: var(--radius-sm); padding: 12px; margin-bottom: 14px; font-size: 0.85rem; color: #9F1239;">
+          ⚠️ <strong>Statutory Warning:</strong> Revoking a certificate immediately flags the instrument as unverified in the National Registry. Further commercial use by the merchant becomes a punishable violation under Section 44.
+        </div>
+
+        <div style="font-size: 0.9rem; margin-bottom: 12px;">
+          Certificate to Revoke: <strong id="revokeCertDisplay" style="font-family: monospace; color: var(--gov-red);"></strong>
+        </div>
+
+        <div class="form-group">
+          <label for="revocation_reason">Mandatory Legal Reason for Revocation <span class="required">*</span></label>
+          <textarea id="revocation_reason" name="revocation_reason" rows="3" class="form-control" placeholder="e.g. Lead verification seal found broken during surprise market raid; potentiometer re-adjusted without authorization..." required></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('revokeModal')">Cancel</button>
+        <button type="submit" class="btn btn-danger">Confirm Official Revocation</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function openRevokeModal(certNo) {
+    document.getElementById('revokeCertNo').value = certNo;
+    document.getElementById('revokeCertDisplay').textContent = certNo;
+    openModal('revokeModal');
+  }
+</script>
+
+<%- include('../partials/footer') %>

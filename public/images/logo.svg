@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 60" width="240" height="60">
+  <defs>
+    <linearGradient id="gradScale" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF9933" />
+      <stop offset="100%" stop-color="#E65100" />
+    </linearGradient>
+    <linearGradient id="gradShield" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#133E87" />
+      <stop offset="100%" stop-color="#0B2545" />
+    </linearGradient>
+  </defs>
+
+  <!-- Shield Badge -->
+  <path d="M 12 10 L 32 4 L 52 10 C 52 30 32 46 32 50 C 32 46 12 30 12 10 Z" fill="url(#gradShield)" stroke="#FF9933" stroke-width="2"/>
+  
+  <!-- Weighing Balance Icon Inside Shield -->
+  <!-- Center Column -->
+  <line x1="32" y1="16" x2="32" y2="40" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
+  <!-- Beam -->
+  <line x1="20" y1="22" x2="44" y2="22" stroke="#FF9933" stroke-width="2" stroke-linecap="round"/>
+  <!-- Center Fulcrum -->
+  <circle cx="32" cy="22" r="2.5" fill="#FFFFFF"/>
+  <!-- Left Pan Strings & Pan -->
+  <line x1="22" y1="22" x2="18" y2="30" stroke="#CBD5E1" stroke-width="1.2"/>
+  <line x1="22" y1="22" x2="26" y2="30" stroke="#CBD5E1" stroke-width="1.2"/>
+  <path d="M 16 30 Q 22 34 28 30 Z" fill="#FF9933"/>
+  <!-- Right Pan Strings & Pan -->
+  <line x1="42" y1="22" x2="38" y2="30" stroke="#CBD5E1" stroke-width="1.2"/>
+  <line x1="42" y1="22" x2="46" y2="30" stroke="#CBD5E1" stroke-width="1.2"/>
+  <path d="M 36 30 Q 42 34 48 30 Z" fill="#FF9933"/>
+  <!-- Base -->
+  <line x1="26" y1="40" x2="38" y2="40" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Logo Text -->
+  <text x="64" y="32" font-family="'Inter', 'Segoe UI', sans-serif" font-size="24" font-weight="800" fill="#0B2545">
+    Metro<tspan fill="#FF9933">Verify</tspan>
+  </text>
+  <text x="65" y="46" font-family="'Inter', 'Segoe UI', sans-serif" font-size="9" font-weight="600" fill="#475569" letter-spacing="1.2">
+    LEGAL METROLOGY PORTAL
+  </text>
+</svg>

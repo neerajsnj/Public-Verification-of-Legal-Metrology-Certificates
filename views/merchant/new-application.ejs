@@ -1,0 +1,102 @@
+<%- include('../partials/header') %>
+
+<div class="container" style="max-width: 860px;">
+  <div class="page-header">
+    <div>
+      <h1>Apply for Instrument Verification</h1>
+      <p>Submit formal verification request under Rule 27 of Legal Metrology (General) Rules, 2011</p>
+    </div>
+    <div class="page-actions">
+      <a href="/merchant/applications" class="btn btn-outline">&larr; Back to Applications</a>
+    </div>
+  </div>
+
+  <div class="card" style="border-top: 4px solid var(--accent-saffron);">
+    <form id="newApplicationForm" action="/merchant/applications/new" method="POST" enctype="multipart/form-data" novalidate>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+      <!-- Step 1: Select Instruments -->
+      <div class="card-header">
+        <h3>1. Select Instrument(s) for Verification</h3>
+        <span style="font-size: 0.8rem; color: var(--text-muted);">Choose one or more units from your inventory</span>
+      </div>
+
+      <div id="instrumentsContainer" class="instrument-select-grid">
+        <% instruments.forEach((inst, idx) => { %>
+          <label class="instrument-select-card" for="inst_<%= inst.id %>">
+            <input type="checkbox" id="inst_<%= inst.id %>" name="instruments" value="<%= inst.id %>" <%= idx === 0 ? 'checked' : '' %>>
+            <div style="flex: 1;">
+              <div class="inst-card-title"><%= inst.type %></div>
+              <div class="inst-card-serial">SN: <%= inst.serial_no %></div>
+              <div class="inst-card-meta">
+                <span>Model: <strong><%= inst.make_model %></strong></span> &bull; 
+                <span><%= inst.min_capacity %>-<%= inst.max_capacity %> <%= inst.capacity_unit %></span>
+              </div>
+              <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">
+                Location: <%= inst.location %> &bull; <span class="badge badge-info" style="font-size: 0.65rem;"><%= inst.accuracy_class %></span>
+              </div>
+            </div>
+          </label>
+        <% }) %>
+      </div>
+
+      <!-- Step 2: Verification Parameters -->
+      <div class="card-header" style="margin-top: 28px;">
+        <h3>2. Verification Type & Scheduling Preferences</h3>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="appType">Verification Type <span class="required">*</span></label>
+          <select id="appType" name="type" class="form-control" required>
+            <option value="Initial Verification">Initial Verification (Newly purchased or installed instrument)</option>
+            <option value="Re-verification">Re-verification (Annual statutory periodic re-verification)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="mode">Verification Mode <span class="required">*</span></label>
+          <select id="mode" name="mode" class="form-control" required>
+            <option value="In-person">In-person Inspection (At Legal Metrology Laboratory or Merchant Premises)</option>
+            <option value="Remote">Remote Verification (For standard pre-packaged automated counters)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="preferred_date">Preferred Appointment Date <span class="required">*</span></label>
+          <% 
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const tomorrowStr = tomorrow.toISOString().split('T')[0];
+          %>
+          <input type="date" id="preferred_date" name="preferred_date" class="form-control" min="<%= tomorrowStr %>" value="<%= tomorrowStr %>" required>
+          <div class="form-hint">Selected date will be reviewed by the inspecting officer for final scheduling</div>
+          <div class="invalid-feedback"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="document">Supporting Document (Invoice or Prior Certificate) <span class="required">*</span></label>
+          <input type="file" id="document" name="document" class="form-control" accept=".pdf,.jpg,.jpeg,.png" required>
+          <div class="form-hint">Accepted formats: PDF, JPG, PNG &bull; Maximum file size: 2 MB</div>
+          <div class="invalid-feedback"></div>
+        </div>
+      </div>
+
+      <div style="background: #F8FAFC; border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 14px; margin-top: 14px; font-size: 0.85rem; color: #475569;">
+        <strong>Statutory Declaration:</strong> I hereby declare that the particulars furnished above are true and complete. The instruments submitted for verification are in working order and comply with the model approval specifications under Section 22 of the Legal Metrology Act, 2009.
+      </div>
+
+      <div style="margin-top: 24px; display: flex; gap: 12px;">
+        <button type="submit" class="btn btn-saffron btn-lg" style="font-weight: 700;">
+          Submit Application for Review &rarr;
+        </button>
+        <a href="/merchant/applications" class="btn btn-outline btn-lg">Cancel</a>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,119 @@
+<%- include('../partials/header') %>
+
+<div class="container" style="max-width: 720px; margin: 30px auto;">
+  <div class="card" style="border-top: 4px solid var(--accent-saffron);">
+    
+    <div style="text-align: center; margin-bottom: 24px;">
+      <h2 style="font-family: var(--font-heading); font-size: 1.6rem; color: var(--primary-navy-dark);">Merchant & Establishment Registration</h2>
+      <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 4px;">
+        Enroll your commercial entity under The Legal Metrology Act, 2009 for digital instrument verification
+      </p>
+    </div>
+
+    <form id="registerForm" action="/auth/register" method="POST" novalidate>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+      <div class="card-header" style="margin-bottom: 14px; padding-bottom: 8px;">
+        <h3>1. Commercial Entity Information</h3>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="business_name">Business / Trade Name <span class="required">*</span></label>
+          <input type="text" id="business_name" name="business_name" class="form-control" placeholder="e.g. Apex Retail Supermarket" value="<%= typeof formData !== 'undefined' ? formData.business_name : '' %>" required>
+          <div class="invalid-feedback"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="name">Authorized Representative / Owner <span class="required">*</span></label>
+          <input type="text" id="name" name="name" class="form-control" placeholder="Full legal name" value="<%= typeof formData !== 'undefined' ? formData.name : '' %>" required>
+          <div class="invalid-feedback"></div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="gstin">GSTIN (15 Alphanumeric) <span class="required">*</span></label>
+          <input type="text" id="gstin" name="gstin" class="form-control" placeholder="07AAAAA0000A1Z5" style="text-transform: uppercase;" value="<%= typeof formData !== 'undefined' ? formData.gstin : '' %>" required>
+          <div class="form-hint">Format: 2 state digits + 10 PAN chars + 1 entity + 1 Z + 1 check digit</div>
+          <div class="invalid-feedback"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="mobile">Mobile Number (10 Digits) <span class="required">*</span></label>
+          <input type="text" id="mobile" name="mobile" class="form-control" placeholder="9811223344" maxlength="10" value="<%= typeof formData !== 'undefined' ? formData.mobile : '' %>" required>
+          <div class="form-hint">Used for official verification SMS dispatch</div>
+          <div class="invalid-feedback"></div>
+        </div>
+      </div>
+
+      <div class="card-header" style="margin-top: 10px; margin-bottom: 14px; padding-bottom: 8px;">
+        <h3>2. Login Credentials</h3>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Official Email Address <span class="required">*</span></label>
+        <input type="email" id="email" name="email" class="form-control" placeholder="contact@establishment.com" value="<%= typeof formData !== 'undefined' ? formData.email : '' %>" required>
+        <div class="invalid-feedback"></div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="password">Account Password <span class="required">*</span></label>
+          <input type="password" id="password" name="password" class="form-control" placeholder="Minimum 6 characters" required>
+          <div class="invalid-feedback"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="confirm_password">Confirm Password <span class="required">*</span></label>
+          <input type="password" id="confirm_password" name="confirm_password" class="form-control" placeholder="Re-enter password" required>
+          <div class="invalid-feedback"></div>
+        </div>
+      </div>
+
+      <div class="card-header" style="margin-top: 10px; margin-bottom: 14px; padding-bottom: 8px;">
+        <h3>3. Physical Establishment Address</h3>
+      </div>
+
+      <div class="form-group">
+        <label for="address">Full Premise / Shop Address <span class="required">*</span></label>
+        <textarea id="address" name="address" rows="2" class="form-control" placeholder="Shop/Unit No., Street, Market / Industrial Area" required><%= typeof formData !== 'undefined' ? formData.address : '' %></textarea>
+        <div class="invalid-feedback"></div>
+      </div>
+
+      <div class="form-row" style="grid-template-columns: 1fr 1fr 1fr;">
+        <div class="form-group">
+          <label for="district">District / Jurisdiction <span class="required">*</span></label>
+          <input type="text" id="district" name="district" class="form-control" placeholder="e.g. Central Delhi" value="<%= typeof formData !== 'undefined' ? formData.district : '' %>" required>
+          <div class="invalid-feedback"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="state">State / UT <span class="required">*</span></label>
+          <input type="text" id="state" name="state" class="form-control" placeholder="e.g. Delhi" value="<%= typeof formData !== 'undefined' ? formData.state : '' %>" required>
+          <div class="invalid-feedback"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="pincode">Postal Pincode <span class="required">*</span></label>
+          <input type="text" id="pincode" name="pincode" class="form-control" placeholder="110006" maxlength="6" value="<%= typeof formData !== 'undefined' ? formData.pincode : '' %>" required>
+          <div class="invalid-feedback"></div>
+        </div>
+      </div>
+
+      <div style="margin-top: 24px;">
+        <button type="submit" class="btn btn-saffron btn-block btn-lg" style="font-weight: 700;">
+          Complete Registration & Proceed &rarr;
+        </button>
+      </div>
+
+      <div style="text-align: center; font-size: 0.88rem; color: var(--text-muted); border-top: 1px solid var(--border-light); padding-top: 16px; margin-top: 20px;">
+        Already registered? 
+        <a href="/auth/login" style="color: var(--primary-navy); font-weight: 700; text-decoration: none;">Sign in here</a>
+      </div>
+    </form>
+
+  </div>
+</div>
+
+<%- include('../partials/footer') %>
