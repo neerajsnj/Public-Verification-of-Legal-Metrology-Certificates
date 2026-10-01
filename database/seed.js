@@ -20,10 +20,12 @@ async function seed() {
         DELETE FROM inspectors;
         DELETE FROM merchants;
         DELETE FROM users;
+        DELETE FROM sqlite_sequence;
     `);
 
     console.log('Cleared existing tables.');
 
+    const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
     const defaultPasswordHash = bcrypt.hashSync('Demo@123', 10);
 
     // 1. Create Users
@@ -166,7 +168,7 @@ async function seed() {
         '-20 days',
         '-18 days'
     );
-    itemStmt.run(app1.lastInsertRowid, inst1.lastInsertRowid);
+    const item1 = itemStmt.run(app1.lastInsertRowid, inst1.lastInsertRowid);
 
     // App 2: Status = 'Certificate Issued' (Expiring Soon - Merchant 2, Sartorius Gold)
     const app2 = appStmt.run(
@@ -183,7 +185,7 @@ async function seed() {
         '-350 days',
         '-345 days'
     );
-    itemStmt.run(app2.lastInsertRowid, inst5.lastInsertRowid);
+    const item2 = itemStmt.run(app2.lastInsertRowid, inst5.lastInsertRowid);
 
     // App 3: Status = 'Certificate Issued' -> BUT WILL BE REVOKED (Merchant 3, Weighbridge)
     const app3 = appStmt.run(
@@ -200,7 +202,7 @@ async function seed() {
         '-40 days',
         '-38 days'
     );
-    itemStmt.run(app3.lastInsertRowid, inst8.lastInsertRowid);
+    const item3 = itemStmt.run(app3.lastInsertRowid, inst8.lastInsertRowid);
 
     // App 4: Status = 'Scheduled' (Merchant 1, Platform Scale)
     const app4 = appStmt.run(
@@ -273,7 +275,7 @@ async function seed() {
     db.prepare(`
         INSERT INTO verification_reports (application_item_id, inspector_id, readings_json, max_error, tolerance_limit, result, remarks, tested_at)
         VALUES (?, ?, ?, 0.002, 5.0, 'pass', 'Instrument verified and stamped under Legal Metrology Rules, 2011. Conforms to Class III standards.', datetime('now', '-18 days'))
-    `).run(1, insp1.lastInsertRowid, readings1);
+    `).run(item1.lastInsertRowid, insp1.lastInsertRowid, readings1);
 
     // Generate PDF 1
     const cert1Data = {
@@ -305,12 +307,12 @@ async function seed() {
         inspector_designation: 'Senior Inspector of Legal Metrology',
         employee_id: 'LM-DL-2018-042'
     };
-    const pdf1Path = await pdfService.generateCertificatePDF(cert1Data, 'http://localhost:3000');
+    const pdf1Path = await pdfService.generateCertificatePDF(cert1Data, baseUrl);
 
     db.prepare(`
         INSERT INTO certificates (cert_no, application_item_id, issued_at, valid_until, status, pdf_path, qr_data)
-        VALUES (?, 1, datetime('now', '-18 days'), date('now', '+347 days'), 'valid', ?, ?)
-    `).run(cert1No, pdf1Path, `http://localhost:3000/verify/${cert1No}`);
+        VALUES (?, ?, datetime('now', '-18 days'), date('now', '+347 days'), 'valid', ?, ?)
+    `).run(cert1No, item1.lastInsertRowid, pdf1Path, `${baseUrl}/verify/${cert1No}`);
 
     // Certificate 2: EXPIRING SOON (within 20 days) (Merchant 2, Sartorius Scale)
     const cert2No = 'LM-2025-MH-084219';
@@ -323,7 +325,7 @@ async function seed() {
     db.prepare(`
         INSERT INTO verification_reports (application_item_id, inspector_id, readings_json, max_error, tolerance_limit, result, remarks, tested_at)
         VALUES (?, ?, ?, 0.008, 0.01, 'pass', 'High-precision balance verified for bullion trade.', datetime('now', '-345 days'))
-    `).run(2, insp2.lastInsertRowid, readings2);
+    `).run(item2.lastInsertRowid, insp2.lastInsertRowid, readings2);
 
     const cert2Data = {
         cert_no: cert2No,
@@ -354,12 +356,12 @@ async function seed() {
         inspector_designation: 'Inspector of Legal Metrology',
         employee_id: 'LM-MH-2020-109'
     };
-    const pdf2Path = await pdfService.generateCertificatePDF(cert2Data, 'http://localhost:3000');
+    const pdf2Path = await pdfService.generateCertificatePDF(cert2Data, baseUrl);
 
     db.prepare(`
         INSERT INTO certificates (cert_no, application_item_id, issued_at, valid_until, status, pdf_path, qr_data)
-        VALUES (?, 2, datetime('now', '-345 days'), date('now', '+20 days'), 'valid', ?, ?)
-    `).run(cert2No, pdf2Path, `http://localhost:3000/verify/${cert2No}`);
+        VALUES (?, ?, datetime('now', '-345 days'), date('now', '+20 days'), 'valid', ?, ?)
+    `).run(cert2No, item2.lastInsertRowid, pdf2Path, `${baseUrl}/verify/${cert2No}`);
 
     // Certificate 3: REVOKED (Merchant 3, Weighbridge)
     const cert3No = 'LM-2026-DL-002158';
@@ -371,7 +373,7 @@ async function seed() {
     db.prepare(`
         INSERT INTO verification_reports (application_item_id, inspector_id, readings_json, max_error, tolerance_limit, result, remarks, tested_at)
         VALUES (?, ?, ?, 0.02, 0.02, 'pass', 'Verified with calibrated axle test lorry.', datetime('now', '-38 days'))
-    `).run(3, insp1.lastInsertRowid, readings3);
+    `).run(item3.lastInsertRowid, insp1.lastInsertRowid, readings3);
 
     const cert3Data = {
         cert_no: cert3No,
@@ -402,17 +404,18 @@ async function seed() {
         inspector_designation: 'Senior Inspector of Legal Metrology',
         employee_id: 'LM-DL-2018-042'
     };
-    const pdf3Path = await pdfService.generateCertificatePDF(cert3Data, 'http://localhost:3000');
+    const pdf3Path = await pdfService.generateCertificatePDF(cert3Data, baseUrl);
 
     db.prepare(`
         INSERT INTO certificates (cert_no, application_item_id, issued_at, valid_until, status, revocation_reason, revoked_at, revoked_by, pdf_path, qr_data)
-        VALUES (?, 3, datetime('now', '-38 days'), date('now', '+327 days'), 'revoked', ?, datetime('now', '-3 days'), ?, ?, ?)
+        VALUES (?, ?, datetime('now', '-38 days'), date('now', '+327 days'), 'revoked', ?, datetime('now', '-3 days'), ?, ?, ?)
     `).run(
         cert3No,
+        item3.lastInsertRowid,
         'Official inspection on surprise raid revealed physical lead seal broken and junction box load-cell sensitivity altered by 340 kg in violation of Section 24 & 44 of Legal Metrology Act, 2009.',
         insp1.lastInsertRowid,
         pdf3Path,
-        `http://localhost:3000/verify/${cert3No}`
+        `${baseUrl}/verify/${cert3No}`
     );
 
     console.log('3 Certificates created (1 valid, 1 expiring soon, 1 revoked) with official PDFs generated.');
